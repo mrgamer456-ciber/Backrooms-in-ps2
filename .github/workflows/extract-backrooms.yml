@@ -49,3 +49,9 @@ jobs:
             git commit -m "Extract Backrooms PS2 source files"
             git push
           fi
+
+      - name: Iniciar workflow separado de compilacao
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run build-backrooms.yml --ref main
+          fi
