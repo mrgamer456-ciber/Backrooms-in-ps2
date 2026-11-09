@@ -37,7 +37,7 @@ struct Item {
     bool active = false;
 };
 
-enum MessageId : uint8_t { MSG_NONE = 0, MSG_FIND_DOOR = 1, MSG_ALMOND_WATER = 2 };
+enum MessageId : uint8_t { MSG_NONE = 0, MSG_FIND_DOOR = 1, MSG_ALMOND_WATER = 2, MSG_PIPE_DREAMS = 3 };
 
 struct Column {
     int top = 0, bottom = 0;
