@@ -336,6 +336,27 @@
         world3d=world||null;
         initialized=true;
       },
+      setTextures(textures) {
+        wallTexture=textures&&textures.wall||null;
+        pipeTexture=textures&&textures.pipe||null;
+      },
+      drawLoading(progress,label) {
+        if(!initialized)throw new Error("Renderer ainda nao inicializado.");
+        const pct=Math.max(0,Math.min(100,progress|0));
+        Screen.clear(color(8,9,7,255));
+        rect(0,h*.25,w,h*.48,color(37,36,23,255));
+        rect(0,h*.25,w,3,color(110,101,55,255));
+        rect(0,h*.73,w,3,color(110,101,55,255));
+        centeredPlain(h*.34,"BACKROOMS",color(224,204,112,255),7);
+        centered(h*.48,label||"CARREGANDO",color(235,232,210,255),2);
+        const bx=w*.16,by=h*.59,bw=w*.68,bh=18;
+        rect(bx-3,by-3,bw+6,bh+6,color(4,4,4,255));
+        rect(bx,by,bw,bh,color(83,79,57,255));
+        if(pct>0)rect(bx+3,by+3,(bw-6)*pct/100,bh-6,color(224,199,91,255));
+        const number=String(pct);
+        centered(h*.65,"CARREGANDO "+number,color(205,202,180,255),2);
+        Screen.flip();
+      },
       draw(game) {
         if(!initialized)throw new Error("Renderer ainda nao inicializado.");
         frame++;Screen.clear(color(0,0,0));
