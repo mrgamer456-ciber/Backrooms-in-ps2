@@ -24,6 +24,7 @@ jobs:
             echo "::error::Nenhum ZIP encontrado na raiz do repositorio."
             exit 1
           fi
+          rm -rf /tmp/backrooms-unpack
           mkdir -p source/backrooms-ps2
           unzip -oq "$ZIP" -d /tmp/backrooms-unpack
           MAKEFILE="$(find /tmp/backrooms-unpack -type f -name Makefile -print -quit)"
@@ -32,6 +33,7 @@ jobs:
             exit 1
           fi
           PROJECT_DIR="$(dirname "$MAKEFILE")"
+          rm -rf source/backrooms-ps2/*
           cp -a "$PROJECT_DIR"/. source/backrooms-ps2/
           rm -rf source/backrooms-ps2/.git source/backrooms-ps2/.github
           test -f source/backrooms-ps2/Makefile
@@ -48,10 +50,4 @@ jobs:
           else
             git commit -m "Extract Backrooms PS2 source files"
             git push
-          fi
-
-      - name: Iniciar workflow separado de compilacao
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run build-backrooms.yml --ref main
           fi
