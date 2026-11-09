@@ -639,7 +639,7 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
     }
     if (g.msgTimer > 0 && g.msgId != bk::MSG_NONE) {
         const char *m = (g.msgId == bk::MSG_FIND_DOOR) ? "ENCONTRE A PORTA ABERTA COM A LUZ BRANCA" :
-                        (g.msgId == bk::MSG_PIPE_DREAMS) ? "NIVEL 2: PIPE DREAMS - SETOR DE MANUTENCAO" : "AGUA DE AMENDOA!";
+                        (g.msgId == bk::MSG_PIPE_DREAMS) ? "NIVEL 2: PIPE DREAMS" : "AGUA DE AMENDOA!";
         drawTextCentered(gs, H * 0.78f, 3.0f, rgb(250, 250, 240), m);
     }
 
