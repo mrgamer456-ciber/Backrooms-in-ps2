@@ -158,4 +158,4 @@
     const ex=g.exitX-g.px,ey=g.exitY-g.py;if(ex*ex+ey*ey<1.69){g.level++;g.stamina=1;g.exhausted=false;startLevel(g);}
   }
   root.BackroomsGame={makeGame,newGame,update,constants:{W,H,SMILER,STALKER,RUNNER,MSG_NONE,MSG_FIND_DOOR,MSG_ALMOND,MSG_PIPE}};
-})(this);
+})(globalThis);
