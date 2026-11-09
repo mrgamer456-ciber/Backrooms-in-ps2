@@ -73,7 +73,8 @@ globalThis.Render = {
 };
 globalThis.Lights = {
   AMBIENT: 0, DIRECTION: 1, DIFFUSE: 2,
-  set(id) { assert.equal(id, 0, "o renderizador deve usar um dos quatro slots de luz"); }
+  new() { return 3; },
+  set(id) { assert.equal(id, 3, "a luz deve usar o identificador retornado por Lights.new()"); }
 };
 globalThis.Batch = class {
   add() {}
