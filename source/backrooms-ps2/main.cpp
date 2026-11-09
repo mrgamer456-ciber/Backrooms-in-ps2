@@ -53,14 +53,17 @@ static void initModules()
 static void initPad()
 {
     padInit(0);
-    padPortOpen(0, 0, padBuf);
+    if (padPortOpen(0, 0, padBuf) == 0) return;
 
-    int state;
-    do {
-        state = padGetState(0, 0);
-    } while (state != PAD_STATE_STABLE && state != PAD_STATE_FINDCTP1);
-
-    padSetMainMode(0, 0, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
+    // Nunca trava a inicializacao do video esperando o controle.
+    // Alguns controles/adaptadores demoram ou nao chegam a PAD_STATE_STABLE.
+    for (int i = 0; i < 120; ++i) {
+        int state = padGetState(0, 0);
+        if (state == PAD_STATE_STABLE || state == PAD_STATE_FINDCTP1) {
+            padSetMainMode(0, 0, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
+            return;
+        }
+    }
 }
 
 #if USE_AUDIO
