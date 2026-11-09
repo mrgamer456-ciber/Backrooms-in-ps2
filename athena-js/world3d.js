@@ -120,7 +120,7 @@
       Screen.setMode(canvas);
       Render.init();
       Render.setView(67,.1,90,canvas.width,canvas.height);
-      light=Lights.new();
+      light=0; // AthenaEnv usa IDs fixos de luz (0 a 3), nao possui Lights.new().
       batch=new Batch({autoSort:true});
       rootNode=new SceneNode();
       ready=true;
