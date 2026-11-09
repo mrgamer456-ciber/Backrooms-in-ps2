@@ -194,18 +194,57 @@
       }
     }
     function drawDoor(g,scene) {
-      const p=projectCenter(g,g.exitX,g.exitY);
-      if(!p)return;
-      const col=Math.max(0,Math.min(scene.columns.length-1,(p.x/(w/scene.columns.length))|0));
-      if(scene.columns[col].type!==2||p.depth>scene.columns[col].depth+0.8)return;
-      const dh=Math.min(h*1.5,p.size*.92),dw=dh*.55;
-      const x=p.x-dw*.5,y=p.horizon-dh*.50;
-      rect(x-dw*.10,y-dh*.04,dw*1.20,dh*1.08,color(150,150,160));
-      rect(x-dw*.06,y-dh*.02,dw*1.12,dh*1.04,color(55,34,20));
-      rect(x,y,dw,dh,color(255,255,255));
-      rect(x+dw*.13,y+dh*.08,dw*.74,dh*.84,color(245,245,245));
-      rect(x+dw*.28,y+dh*.12,dw*.44,dh*.76,color(255,255,255));
-      rect(x-dw*.08,y-dh*.05,dw*1.16,dh*.035,color(255,255,255));
+      const ex=g.exitX|0,ey=g.exitY|0,det=g.planeX*g.dirY-g.dirX*g.planeY;
+      if(Math.abs(det)<.0001)return;
+      const invDet=1/det;
+      let tx=1,ty=0,nx=0,ny=1;
+      const tile=(x,y)=>(x<0||y<0||x>=40||y>=40)?1:g.map[y*40+x];
+      if(tile(ex+1,ey)===0){tx=0;ty=1;nx=1;ny=0;}
+      else if(tile(ex-1,ey)===0){tx=0;ty=1;nx=-1;ny=0;}
+      else if(tile(ex,ey+1)===0){tx=1;ty=0;nx=0;ny=1;}
+      else if(tile(ex,ey-1)===0){tx=1;ty=0;nx=0;ny=-1;}
+      const point=(along,normal,z)=>({x:g.exitX+tx*along+nx*normal,y:g.exitY+ty*along+ny*normal,z});
+      const project=(v)=>{
+        const rx=v.x-g.px,ry=v.y-g.py;
+        const cameraX=invDet*(g.dirY*rx-g.dirX*ry);
+        const depth=invDet*(-g.planeY*rx+g.planeX*ry);
+        if(depth<=.18)return null;
+        return {x:w*.5*(1+cameraX/depth),y=h*(.5+g.pitch)+(.5-v.z)*h/depth,depth};
+      };
+      const face=(a,b,c0,d,col)=>{
+        const p1=project(a),p2=project(b),p3=project(c0),p4=project(d);
+        if(!p1||!p2||!p3||!p4)return;
+        if(p1.x< -w||p1.x>w*2||p2.x< -w||p2.x>w*2||p3.x< -w||p3.x>w*2||p4.x< -w||p4.x>w*2)return;
+        Draw.quad(p1.x,p1.y,p2.x,p2.y,p3.x,p3.y,p4.x,p4.y,col,col,col,col);
+      };
+      const center=project(point(0,0,.5));
+      if(!center)return;
+      const centerCol=(center.x/(w/scene.columns.length))|0;
+      if(centerCol<0||centerCol>=scene.columns.length||scene.columns[centerCol].type!==2)return;
+      const glow=1.05+.25*g.flicker;
+      face(point(-.39,.010,0),point(.39,.010,0),point(.39,.010,.98),point(-.39,.010,.98),color(145*glow,145*glow,155*glow));
+      face(point(-.35,.014,.02),point(.35,.014,.02),point(.35,.014,.94),point(-.35,.014,.94),color(205*glow,205*glow,210*glow));
+      face(point(-.29,.018,.05),point(.29,.018,.05),point(.29,.018,.90),point(-.29,.018,.90),color(245*glow,245*glow,245*glow));
+      face(point(-.15,.024,.08),point(.15,.024,.08),point(.15,.024,.86),point(-.15,.024,.86),color(255,255,255));
+      face(point(-.43,.075,0),point(-.33,.075,0),point(-.33,.075,1),point(-.43,.075,1),color(48,29,17));
+      face(point(.33,.075,0),point(.43,.075,0),point(.43,.075,1),point(.33,.075,1),color(48,29,17));
+      face(point(-.43,.075,.91),point(.43,.075,.91),point(.43,.075,1),point(-.43,.075,1),color(75,47,26));
+      face(point(-.43,0,0),point(-.43,.075,0),point(-.43,.075,1),point(-.43,0,1),color(29,18,12));
+      face(point(.43,0,0),point(.43,.075,0),point(.43,.075,1),point(.43,0,1),color(29,18,12));
+      const hinge=-.33,leafW=.66,ca=.53,sa=.85;
+      const leaf=(u,z,offset)=>point(hinge+u*ca,.085+u*sa+offset,z);
+      face(leaf(0,.035,0),leaf(leafW,.035,0),leaf(leafW,.91,0),leaf(0,.91,0),color(91,52,27));
+      face(leaf(.04,.08,.006),leaf(leafW-.04,.08,.006),leaf(leafW-.04,.43,.006),leaf(.04,.43,.006),color(139,87,44));
+      face(leaf(.04,.53,.006),leaf(leafW-.04,.53,.006),leaf(leafW-.04,.86,.006),leaf(.04,.86,.006),color(139,87,44));
+      face(leaf(.075,.12,.010),leaf(leafW-.075,.12,.010),leaf(leafW-.075,.39,.010),leaf(.075,.39,.010),color(76,43,24));
+      face(leaf(.075,.57,.010),leaf(leafW-.075,.57,.010),leaf(leafW-.075,.82,.010),leaf(.075,.82,.010),color(76,43,24));
+      for(let grain=0;grain<5;grain++) {
+        const u=.12+grain*.105;
+        face(leaf(u,.15,.014),leaf(u+.012,.15,.014),leaf(u+.012,.80,.014),leaf(u,.80,.014),color(158+grain*2,101+grain*2,51));
+      }
+      face(leaf(leafW-.025,.04,.018),leaf(leafW,.04,.018),leaf(leafW,.90,.018),leaf(leafW-.025,.90,.018),color(39,23,14));
+      face(leaf(.10,.43,.020),leaf(.18,.43,.020),leaf(.18,.49,.020),leaf(.10,.49,.020),color(240,184,55));
+      face(point(-.43,.02,0),point(.43,.02,0),point(.43,.13,.025),point(-.43,.13,.025),color(84,54,30));
     }
     function drawCabinet(g,scene) {
       if(g.level!==2||!g.cabinets.length)return;
