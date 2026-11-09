@@ -109,6 +109,7 @@ globalThis.RenderData = class {
 };
 globalThis.RenderObject = class {
   constructor(data) { this.data = data; }
+  render() {}
 };
 globalThis.Camera = {
   position() {}, target() {}, update() {}
