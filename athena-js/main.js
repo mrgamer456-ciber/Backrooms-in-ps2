@@ -1,6 +1,7 @@
 import "game.js";
 import "input.js";
 import "raycast.js";
+import "font.js";
 import "render.js";
 import "audio.js";
 
