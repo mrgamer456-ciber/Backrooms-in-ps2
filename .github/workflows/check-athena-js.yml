@@ -36,3 +36,17 @@ jobs:
           done
       - name: Run game logic smoke tests
         run: node tests/athena-js-smoke.mjs
+
+      - name: Package AthenaEnv JavaScript files
+        run: |
+          mkdir -p dist
+          cp -r athena-js dist/athena-js
+          cd dist
+          zip -r Backrooms-AthenaEnv-JS.zip athena-js
+      - name: Upload AthenaEnv JavaScript package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Backrooms-AthenaEnv-JS
+          path: dist/Backrooms-AthenaEnv-JS.zip
+          if-no-files-found: error
+          retention-days: 30
