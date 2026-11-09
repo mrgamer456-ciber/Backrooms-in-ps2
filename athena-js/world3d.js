@@ -13,6 +13,10 @@
     if(x<0||y<0||x>=W||y>=H)return 1;
     return g.map[y*W+x];
   }
+  function openTile(g,x,y) {
+    const t=tile(g,x,y);
+    return t===0||t===2||t===3;
+  }
   function makeMtl(level) {
     return [
       "newmtl wallpaper","Ka 0.45 0.42 0.30","Kd 1 1 1","Ks 0 0 0","illum 1","map_Kd bk_wallpaper.bmp","",
@@ -48,11 +52,11 @@
     }
     // Paredes: so cria as faces que ficam voltadas para celulas transitaveis.
     const wallMat=g.level===2?"pipewall":"wallpaper";
-    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(tile(g,x,y)===1||tile(g,x,y)===2) {
-      if(tile(g,x,y-1)===0)quad(wallMat,[vec(x+1,0,y),vec(x,0,y),vec(x,WALL_H,y),vec(x+1,WALL_H,y)],uvWall,[0,0,-1]);
-      if(tile(g,x,y+1)===0)quad(wallMat,[vec(x,0,y+1),vec(x+1,0,y+1),vec(x+1,WALL_H,y+1),vec(x,WALL_H,y+1)],uvWall,[0,0,1]);
-      if(tile(g,x-1,y)===0)quad(wallMat,[vec(x,0,y),vec(x,0,y+1),vec(x,WALL_H,y+1),vec(x,WALL_H,y)],uvWall,[-1,0,0]);
-      if(tile(g,x+1,y)===0)quad(wallMat,[vec(x+1,0,y+1),vec(x+1,0,y),vec(x+1,WALL_H,y),vec(x+1,WALL_H,y+1)],uvWall,[1,0,0]);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(tile(g,x,y)===1) {
+      if(openTile(g,x,y-1))quad(wallMat,[vec(x+1,0,y),vec(x,0,y),vec(x,WALL_H,y),vec(x+1,WALL_H,y)],uvWall,[0,0,-1]);
+      if(openTile(g,x,y+1))quad(wallMat,[vec(x,0,y+1),vec(x+1,0,y+1),vec(x+1,WALL_H,y+1),vec(x,WALL_H,y+1)],uvWall,[0,0,1]);
+      if(openTile(g,x-1,y))quad(wallMat,[vec(x,0,y),vec(x,0,y+1),vec(x,WALL_H,y+1),vec(x,WALL_H,y)],uvWall,[-1,0,0]);
+      if(openTile(g,x+1,y))quad(wallMat,[vec(x+1,0,y+1),vec(x+1,0,y),vec(x+1,WALL_H,y),vec(x+1,WALL_H,y+1)],uvWall,[1,0,0]);
     }
     // Porta branca: moldura, folha de madeira inclinada e painel luminoso.
     const ex=g.exitX|0,ey=g.exitY|0;
@@ -61,7 +65,7 @@
     else if(tile(g,ex-1,ey)===0){tx=0;ty=1;nx=-1;ny=0;}
     else if(tile(g,ex,ey+1)===0){tx=1;ty=0;nx=0;ny=1;}
     else if(tile(g,ex,ey-1)===0){tx=1;ty=0;nx=0;ny=-1;}
-    const p=(along,normal,z)=>vec(g.exitX+tx*along+nx*normal,z,g.exitY+ty*along+ny*normal);
+    const p=(along,normal,z)=>vec(g.exitX+tx*along+nx*(normal+.5),z,g.exitY+ty*along+ny*(normal+.5));
     const frontUV=[[0,0],[1,0],[1,1],[0,1]],normal=[nx,0,ny];
     quad("doorglow",[p(-.34,.012,.05),p(.34,.012,.05),p(.34,.012,2.15),p(-.34,.012,2.15)],frontUV,normal);
     quad("doorframe",[p(-.44,.07,0),p(-.34,.07,0),p(-.34,.07,2.25),p(-.44,.07,2.25)],frontUV,normal);
