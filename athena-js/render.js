@@ -10,6 +10,11 @@
     const rect=(x,y,rw,rh,c)=>{
       if(rw>0&&rh>0)Draw.rect(x,y,rw,rh,c);
     };
+    function hashf(n) {
+      n=n>>>0;n=(n^(n>>>15))>>>0;n=Math.imul(n,2246822519)>>>0;
+      n=(n^(n>>>13))>>>0;n=Math.imul(n,3266489917)>>>0;
+      n=(n^(n>>>16))>>>0;return (n&65535)/65535;
+    }
     function text(x,y,s,c,scale) {
       root.BackroomsFont.shadow(x,y,scale||1,c,s);
     }
@@ -209,13 +214,18 @@
       rect(bx,by,43,19,white);rect(bx+43,by+5,4,9,white);
       rect(bx+3,by+3,37,13,color(25,28,22));
       for(let i=0;i<3;i++)rect(bx+5+i*11,by+5,9,9,color(190,220,178));
-      const sec=Math.max(1,g.survived|0);
+      let sec=(g.survived|0)+1;if(sec<1)sec=1;
       const clock=("0"+((sec/3600)|0)).slice(-2)+":"+("0"+(((sec/60)|0)%60)).slice(-2)+":"+("0"+(sec%60)).slice(-2);
       text(35,h-69,clock,white,3);
-      for(let i=0;i<7;i++) {
+      for(let i=0;i<9;i++) {
         const n=(frame*37+i*7919)>>>0;
-        const x=(n%Math.max(1,w-45)),y=54+((n>>>8)%(Math.max(1,h-108)));
-        if((n&3)!==0)rect(x,y,5+(n%35),1,i%2?dim:white);
+        const y=54+hashf(n)*(h-108),x=hashf(n+17)*(w-45);
+        const len=5+hashf(n+31)*38;
+        if((n&3)!==0)rect(x,y,len,1,(i&1)?dim:white);
+      }
+      if((frame%47)<3) {
+        const y=h-20-hashf(frame)*24;
+        rect(18,y,w*(.18+.55*hashf(frame+9)),1,dim);
       }
     }
     function drawDoor(g,scene) {
@@ -307,8 +317,9 @@
       text(w-92,h-31,g.flashlight?"LANT ON":"LANT OFF",g.flashlight?color(255,235,145):color(115,115,105),2);
     }
     function drawTitle() {
+      const fl=.85+.15*hashf((frame/3)|0);
       rect(0,0,w,h,color(30,27,8));
-      rect(0,h*.28,w,h*.32,color(205,186,84));
+      rect(0,h*.28,w,h*.32,color(205*fl,186*fl,84*fl));
       centeredPlain(h*.34,"BACKROOMS",color(50,40,5),8);
       centeredPlain(h*.50,"NIVEL 0",color(90,75,15),3);
       if((frame/30|0)%2===0)centered(h*.68,"APERTE START OU R2",color(240,240,240),3);
@@ -317,15 +328,16 @@
     }
     function drawDead(g) {
       rect(0,0,w,h,color(0,0,0));
-      const size=h*.50,cx=w*.5+Math.sin(frame)*3,top=h*.06;
+      const j=(hashf(frame)-.5)*10,fw=h*.50,cx=w*.5+j,top=h*.06+j,fh=h*.62;
       const runner=g.killer===2,stalker=g.killer===1;
-      rect(cx-size*.5,top,size,size*.9,runner?color(170,25,25):color(225,225,212));
-      const eyeW=size*(stalker ? 0.16 : 0.10);
-      const eye=runner?color(255,255,255):color(0,0,0);
-      rect(cx-size*(.20+(stalker ? 0.16 : 0.10)),top+size*.9*.26,size*.10+eyeW*.25,size*.9*.20,eye);
-      rect(cx+size*.10,top+size*.9*.26,size*(.10+eyeW*.25),size*.9*.20,eye);
-      if(!stalker)rect(cx-size*.34,top+size*.9*.62,size*.68,size*.9*.10,color(0,0,0));
-      const sec=g.survived|0;
+      const faceCol=runner?color(170,25,25):color(225,225,212);
+      const eyeCol=runner?color(255,255,255):color(0,0,0);
+      const ew=stalker?.16:.10;
+      rect(cx-fw*.5,top,fw,fh,faceCol);
+      rect(cx-fw*(.20+ew),top+fh*.26,fw*.10,fh*.20,eyeCol);
+      rect(cx+fw*.10,top+fh*.26,fw*(.10+ew),fh*.20,eyeCol);
+      if(!stalker)rect(cx-fw*.34,top+fh*.62,fw*.68,fh*.10,color(0,0,0));
+      let sec=(g.survived|0);if(sec<0)sec=0;
       const clock=("0"+((sec/60)|0)).slice(-2)+":"+("0"+(sec%60)).slice(-2);
       centered(h*.74,"VOCE FOI PEGO",color(200,20,20),4);
       centered(h*.84,"NIVEL "+g.level+"  TEMPO "+clock,color(220,220,220),2);
