@@ -15,8 +15,11 @@ import "world3d.js";
       throw new Error("Carregue game.js, input.js, raycast.js, render.js, audio.js, assets.js, font.js e world3d.js antes de main.js.");
     const game=root.BackroomsGame.makeGame();
     const renderer=root.BackroomsRenderer.createRenderer();
-    let textures=null;
-    if(root.BackroomsAssets.create())textures=root.BackroomsAssets.load();
+    if(!root.BackroomsAssets.create())
+      throw new Error("Falha ao gerar as texturas BMP do Backrooms. Verifique o espaco livre e a pasta de scripts.");
+    const textures=root.BackroomsAssets.load();
+    if(!textures)
+      throw new Error("AthenaEnv nao conseguiu carregar as texturas BMP do Backrooms.");
     const world3d=root.BackroomsWorld3D.create();
     world3d.init();
     renderer.init(textures,world3d);
