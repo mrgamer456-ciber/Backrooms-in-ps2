@@ -42,7 +42,7 @@
     const uvWall=[[0,0],[1,0],[1,WALL_H],[0,WALL_H]];
     const uvFlat=[[0,0],[1,0],[1,1],[0,1]];
     // Piso e teto em placas por celula livre, com coordenadas UV repetiveis.
-    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(tile(g,x,y)===0) {
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(tile(g,x,y)===0||tile(g,x,y)===2||tile(g,x,y)===3) {
       quad("floor",[vec(x,0,y),vec(x,0,y+1),vec(x+1,0,y+1),vec(x+1,0,y)],uvFlat,[0,1,0]);
       quad("ceiling",[vec(x,WALL_H,y),vec(x+1,WALL_H,y),vec(x+1,WALL_H,y+1),vec(x,WALL_H,y+1)],uvFlat,[0,-1,0]);
     }
