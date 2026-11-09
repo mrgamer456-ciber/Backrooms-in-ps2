@@ -213,6 +213,7 @@ static void drawTextCentered(GSGLOBAL *gs, float y, float scale, u64 col, const 
 
 #if USE_WALL_TEXTURE
 static GSTEXTURE wallTex;
+static GSTEXTURE pipeWallTex;
 
 static void initWallTexture(GSGLOBAL *gs)
 {
@@ -224,6 +225,15 @@ static void initWallTexture(GSGLOBAL *gs)
     bk::makeWallpaper((uint32_t *)wallTex.Mem, bk::WALL_TEX_SIZE);
     wallTex.Vram = gsKit_vram_alloc(gs, gsKit_texture_size(wallTex.Width, wallTex.Height, wallTex.PSM), GSKIT_ALLOC_USERBUFFER);
     gsKit_texture_upload(gs, &wallTex);
+
+    pipeWallTex.Width = bk::WALL_TEX_SIZE;
+    pipeWallTex.Height = bk::WALL_TEX_SIZE;
+    pipeWallTex.PSM = GS_PSM_CT32;
+    pipeWallTex.Filter = GS_FILTER_NEAREST;
+    pipeWallTex.Mem = (u32 *)memalign(128, gsKit_texture_size_ee(pipeWallTex.Width, pipeWallTex.Height, pipeWallTex.PSM));
+    bk::makePipeDreamsWall((uint32_t *)pipeWallTex.Mem, bk::WALL_TEX_SIZE);
+    pipeWallTex.Vram = gsKit_vram_alloc(gs, gsKit_texture_size(gs, pipeWallTex.Width, pipeWallTex.Height, pipeWallTex.PSM), GSKIT_ALLOC_USERBUFFER);
+    gsKit_texture_upload(gs, &pipeWallTex);
 }
 #endif
 
@@ -338,11 +348,20 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
         float t = ((float)i + 0.5f) / (float)bands;
         float k = (0.72f * (1.0f - t) + 0.16f) * flick;
         float y0 = horizon * (float)i / bands, y1 = horizon * (float)(i + 1) / bands;
-        // Teto liso amarelado, com variacao suave de luz; nao reutiliza a textura das paredes.
-        rect(gs, 0, y0, W, y1, rgb(218 * k, 211 * k, 166 * k));
+        if (g.level == 2) {
+            float industrial = (0.58f * (1.0f - t) + 0.10f) * flick;
+            rect(gs, 0, y0, W, y1, rgb(72 * industrial, 76 * industrial, 72 * industrial));
+            // Travessas escuras no teto de concreto.
+            if ((i % 3) == 0) rect(gs, 0, y0, W, y0 + 2.0f, rgb(28, 29, 27));
+        } else {
+            rect(gs, 0, y0, W, y1, rgb(218 * k, 211 * k, 166 * k));
+        }
         float k2 = (0.50f * (1.0f - t) + 0.08f) * flick;
         float f0 = H - y1, f1 = H - y0;
-        rect(gs, 0, f0, W, f1, rgb(120 * k2, 95 * k2, 50 * k2));
+        if (g.level == 2)
+            rect(gs, 0, f0, W, f1, rgb(43 * k2, 42 * k2, 37 * k2));
+        else
+            rect(gs, 0, f0, W, f1, rgb(120 * k2, 95 * k2, 50 * k2));
     }
 
     // Luminarias fluorescentes retangulares no teto, em perspectiva.
@@ -354,12 +373,17 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
         float halfH = H * (0.004f + 0.018f * (1.0f - t));
         float cx = W * 0.5f;
         float glow = (0.72f + 0.28f * flick) * (1.0f - 0.10f * t);
-        // halo difuso e moldura metalica escura
-        rect(gs, cx - halfW * 1.30f, cy - halfH * 1.75f, cx + halfW * 1.30f, cy + halfH * 1.75f, rgb(232 * glow, 222 * glow, 166 * glow));
-        rect(gs, cx - halfW, cy - halfH, cx + halfW, cy + halfH, rgb(65, 61, 43));
-        rect(gs, cx - halfW * 0.88f, cy - halfH * 0.70f, cx + halfW * 0.88f, cy + halfH * 0.70f, rgb(255 * glow, 255 * glow, 238 * glow));
-        // pequenas bordas para dar profundidade ao difusor
-        rect(gs, cx - halfW * 0.88f, cy - halfH * 0.70f, cx + halfW * 0.88f, cy - halfH * 0.48f, rgb(255, 255, 250));
+        if (g.level == 2) {
+            // Luminarias industriais vermelhas de emergencia.
+            rect(gs, cx - halfW * 1.25f, cy - halfH * 1.8f, cx + halfW * 1.25f, cy + halfH * 1.8f, rgb(95 * glow, 18 * glow, 10 * glow));
+            rect(gs, cx - halfW, cy - halfH, cx + halfW, cy + halfH, rgb(38, 34, 30));
+            rect(gs, cx - halfW * 0.82f, cy - halfH * 0.60f, cx + halfW * 0.82f, cy + halfH * 0.60f, rgb(255 * glow, 72 * glow, 35 * glow));
+        } else {
+            rect(gs, cx - halfW * 1.30f, cy - halfH * 1.75f, cx + halfW * 1.30f, cy + halfH * 1.75f, rgb(232 * glow, 222 * glow, 166 * glow));
+            rect(gs, cx - halfW, cy - halfH, cx + halfW, cy + halfH, rgb(65, 61, 43));
+            rect(gs, cx - halfW * 0.88f, cy - halfH * 0.70f, cx + halfW * 0.88f, cy + halfH * 0.70f, rgb(255 * glow, 255 * glow, 238 * glow));
+            rect(gs, cx - halfW * 0.88f, cy - halfH * 0.70f, cx + halfW * 0.88f, cy - halfH * 0.48f, rgb(255, 255, 250));
+        }
     }
 
     // paredes
@@ -377,7 +401,8 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
             if (v1 < 0) v1 = 0;
             if (v2 > T) v2 = T;
             // MODULATE: 128 = brilho original; abaixo disso escurece (neblina)
-            gsKit_prim_sprite_texture(gs, &wallTex, x * colW, (float)c.top, u, v1,
+            GSTEXTURE *activeWall = (g.level == 2) ? &pipeWallTex : &wallTex;
+            gsKit_prim_sprite_texture(gs, activeWall, x * colW, (float)c.top, u, v1,
                                       (x + 1) * colW, (float)c.bottom, u + 1.0f, v2, 1,
                                       rgb(128.0f * b, 128.0f * b, 128.0f * b));
             continue;
@@ -394,6 +419,8 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
             // A saida agora e branca e mais clara que as paredes do corredor.
             if (b < 1.0f) b = 1.0f;
             r = 255; gr = 255; bl = 255;
+        } else if (g.level == 2) {
+            r = 87; gr = 78; bl = 63;
         } else {
             r = 205; gr = 186; bl = 84;
         }
@@ -611,7 +638,8 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
         rect(gs, 22, H - 42, 22 + 120 * f, H - 38, rgb(60, 140, 255));
     }
     if (g.msgTimer > 0 && g.msgId != bk::MSG_NONE) {
-        const char *m = (g.msgId == bk::MSG_FIND_DOOR) ? "ENCONTRE A PORTA ABERTA COM A LUZ BRANCA" : "AGUA DE AMENDOA!";
+        const char *m = (g.msgId == bk::MSG_FIND_DOOR) ? "ENCONTRE A PORTA ABERTA COM A LUZ BRANCA" :
+                        (g.msgId == bk::MSG_PIPE_DREAMS) ? "NIVEL 2: PIPE DREAMS - SETOR DE MANUTENCAO" : "AGUA DE AMENDOA!";
         drawTextCentered(gs, H * 0.78f, 3.0f, rgb(250, 250, 240), m);
     }
 
