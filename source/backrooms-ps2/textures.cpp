@@ -66,4 +66,37 @@ void makeWallpaper(uint32_t* px, int size) {
     }
 }
 
+void makePipeDreamsWall(uint32_t* px, int size) {
+    for (int y = 0; y < size; y++) {
+        for (int x = 0; x < size; x++) {
+            float n = (float)(hash2(x / 3, y / 3, 29) & 255) / 255.0f;
+            float grain = ((float)(hash2(x, y, 41) & 255) / 255.0f - 0.5f) * 18.0f;
+            float r = 73.0f + n * 24.0f + grain;
+            float g = 69.0f + n * 23.0f + grain;
+            float b = 59.0f + n * 19.0f + grain;
+
+            // Tubo vermelho horizontal com sombra, brilho e suportes metalicos.
+            int pipeY = y % 64;
+            if (pipeY >= 17 && pipeY <= 29) {
+                r = 105.0f + n * 28.0f;
+                g = 20.0f + n * 10.0f;
+                b = 13.0f + n * 8.0f;
+                if (pipeY == 17 || pipeY == 29) { r *= 0.42f; g *= 0.42f; b *= 0.42f; }
+                if (pipeY >= 20 && pipeY <= 22) { r = 190.0f; g = 48.0f; b = 30.0f; }
+            }
+            // Flanges e parafusos repetidos ao longo do cano.
+            int bandX = x % 64;
+            if (pipeY >= 15 && pipeY <= 31 && bandX >= 29 && bandX <= 34) {
+                r = 105.0f; g = 103.0f; b = 91.0f;
+                if (pipeY == 18 || pipeY == 28) { r = 175.0f; g = 169.0f; b = 145.0f; }
+            }
+            // Fissuras escuras e marcas de umidade no concreto.
+            if (((x * 13 + y * 7) % 97) < 2) { r *= 0.55f; g *= 0.55f; b *= 0.55f; }
+            if (y > size - 9) { r = 35; g = 33; b = 29; }
+            px[y * size + x] = (0x80u << 24) | ((uint32_t)c8(b) << 16) |
+                               ((uint32_t)c8(g) << 8) | c8(r);
+        }
+    }
+}
+
 }  // namespace bk
