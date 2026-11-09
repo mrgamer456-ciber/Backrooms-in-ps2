@@ -26,7 +26,8 @@
       root.BackroomsFont.draw((w-root.BackroomsFont.width(s,size))/2,y,size,c,s);
     }
     function drawBackground(g,scene) {
-      const horizon=scene.horizon;
+      let horizon=h*(.5+g.pitch)+g.jumpHeight*h*.55;
+      horizon=Math.max(h*.12,Math.min(h*.90,horizon));
       const bands=16;
       for(let i=0;i<bands;i++) {
         const t=(i+0.5)/bands;
