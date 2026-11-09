@@ -7,6 +7,7 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 - `main.js`: entrada automatica, imports e loop com `os.setInterval`.
 - `audio.js`: gera WAVs pequenos no primeiro inicio e toca ambiente, passos, batimento, coleta, transicao de nivel e susto.
 - `assets.js`: gera os dois BMPs procedurais de parede, incluindo papel de parede do nivel 1 e tubos do Pipe Dreams.
+- `font.js`: porta a fonte bitmap 5x7 original, usada na tela inicial, HUD, VHS e tela de morte.
 - `game.js`: logica do jogo — mapa, movimento, colisao, pulo, stamina, lanterna, armario, itens e IA das anomalias.
 - `input.js`: leitura do DualShock pelo modulo `Pads`, incluindo analogicos, direcional e botoes.
 - `raycast.js`: raycaster por coluna, profundidade, iluminacao da lanterna e projecao de sprites.
@@ -14,7 +15,7 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 
 ## Como testar no AthenaEnv
 
-1. Copie os sete arquivos JavaScript desta pasta para a pasta de scripts do AthenaEnv, mantendo todos juntos.
+1. Copie os oito arquivos JavaScript desta pasta para a pasta de scripts do AthenaEnv, mantendo todos juntos.
 2. Configure o AthenaEnv para iniciar `main.js` (esse e o nome padrao do runtime).
 3. Inicie o AthenaEnv no PS2. O jogo abre na tela inicial.
 4. Aperte START ou R2 para iniciar.
