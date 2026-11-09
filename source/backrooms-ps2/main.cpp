@@ -232,7 +232,7 @@ static void initWallTexture(GSGLOBAL *gs)
     pipeWallTex.Filter = GS_FILTER_NEAREST;
     pipeWallTex.Mem = (u32 *)memalign(128, gsKit_texture_size_ee(pipeWallTex.Width, pipeWallTex.Height, pipeWallTex.PSM));
     bk::makePipeDreamsWall((uint32_t *)pipeWallTex.Mem, bk::WALL_TEX_SIZE);
-    pipeWallTex.Vram = gsKit_vram_alloc(gs, gsKit_texture_size(gs, pipeWallTex.Width, pipeWallTex.Height, pipeWallTex.PSM), GSKIT_ALLOC_USERBUFFER);
+    pipeWallTex.Vram = gsKit_vram_alloc(gs, gsKit_texture_size(pipeWallTex.Width, pipeWallTex.Height, pipeWallTex.PSM), GSKIT_ALLOC_USERBUFFER);
     gsKit_texture_upload(gs, &pipeWallTex);
 }
 #endif
