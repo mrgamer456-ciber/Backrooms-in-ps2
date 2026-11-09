@@ -16,6 +16,10 @@
     function centered(y,s,c,scale) {
       root.BackroomsFont.centered(y,scale||1,c,s,w);
     }
+    function centeredPlain(y,s,c,scale) {
+      const size=scale||1;
+      root.BackroomsFont.draw((w-root.BackroomsFont.width(s,size))/2,y,size,c,s);
+    }
     function drawBackground(g,scene) {
       const horizon=scene.horizon;
       const bands=16;
@@ -241,8 +245,8 @@
     function drawTitle() {
       rect(0,0,w,h,color(30,27,8));
       rect(0,h*.28,w,h*.32,color(205,186,84));
-      centered(h*.34,"BACKROOMS",color(50,40,5),8);
-      centered(h*.50,"NIVEL 0",color(90,75,15),3);
+      centeredPlain(h*.34,"BACKROOMS",color(50,40,5),8);
+      centeredPlain(h*.50,"NIVEL 0",color(90,75,15),3);
       if((frame/30|0)%2===0)centered(h*.68,"APERTE START OU R2",color(240,240,240),3);
       centered(h*.80,"ANALOGICO DIREITO: OLHAR E VIRAR",color(200,200,190),2);
       centered(h*.86,"R1: CORRER  L1: LANTERNA",color(200,200,190),2);
