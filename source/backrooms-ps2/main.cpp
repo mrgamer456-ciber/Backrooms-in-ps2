@@ -291,9 +291,9 @@ static void drawWorld(GSGLOBAL *gs)
     // As mais distantes ficam pequenas perto do horizonte; as proximas crescem em direcao ao topo.
     for (int i = 0; i < 5; i++) {
         float t = (float)i / 4.0f;
-        float cy = horizon - (horizon - 8.0f) * (1.0f - t) * 0.92f;
-        float halfW = W * (0.025f + 0.105f * t);
-        float halfH = H * (0.004f + 0.018f * t);
+        float cy = 8.0f + (horizon - 8.0f) * t;
+        float halfW = W * (0.025f + 0.105f * (1.0f - t));
+        float halfH = H * (0.004f + 0.018f * (1.0f - t));
         float cx = W * 0.5f;
         float glow = (0.72f + 0.28f * flick) * (1.0f - 0.10f * t);
         // halo difuso e moldura metalica escura
