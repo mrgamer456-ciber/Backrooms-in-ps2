@@ -52,6 +52,7 @@ static void initModules()
 
 static bool padOpened = false;
 static bool padModeRequested = false;
+static bool l1WasDown = false;
 
 // A deteccao de alguns controles paralelos demora mais que a inicializacao
 // do jogo. Por isso, a troca para analogico e tentada durante o jogo tambem.
@@ -154,7 +155,10 @@ static bk::Input readInput()
         in.moveX = clamp1(in.moveX);
         in.moveY = clamp1(in.moveY);
         in.turn = clamp1(in.turn);
-        in.sprint = (b & (PAD_R1 | PAD_CROSS)) != 0;
+        in.sprint = (b & PAD_R1) != 0;
+        bool l1Down = (b & PAD_L1) != 0;
+        in.toggleFlashlight = l1Down && !l1WasDown;
+        l1WasDown = l1Down;
         in.restart = (b & (PAD_START | PAD_CROSS)) != 0;
     }
     return in;
@@ -249,7 +253,7 @@ static void drawTitle(GSGLOBAL *gs, uint32_t frame)
     if (((frame / 30u) & 1u) == 0)
         drawTextCentered(gs, H * 0.68f, 3.0f, rgb(240, 240, 240), "APERTE START");
     drawTextCentered(gs, H * 0.80f, 2.0f, rgb(200, 200, 190), "ANALOGICO DIREITO: OLHAR E VIRAR");
-    drawTextCentered(gs, H * 0.86f, 2.0f, rgb(200, 200, 190), "R1 OU X: CORRER");
+    drawTextCentered(gs, H * 0.86f, 2.0f, rgb(200, 200, 190), "R1: CORRER   L1: LANTERNA");
 }
 
 static void drawDead(GSGLOBAL *gs, uint32_t frame)
@@ -391,6 +395,16 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
         const bk::Column &c = g.cols[x];
         if (c.bottom <= c.top) continue;
         float b = c.bright * flick;
+        if (g.flashlight) {
+            float screenOffset = fabsf(((float)x + 0.5f) / (float)bk::RAY_COLS - 0.5f) * 2.0f;
+            float cone = 1.0f - screenOffset;
+            if (cone < 0.0f) cone = 0.0f;
+            cone = cone * cone * (3.0f - 2.0f * cone);
+            float reach = 1.0f - c.depth / 10.0f;
+            if (reach < 0.0f) reach = 0.0f;
+            b += 1.05f * cone * reach;
+            if (b > 1.75f) b = 1.75f;
+        }
 #if USE_WALL_TEXTURE
         if (c.type == 1) {
             const float T = (float)bk::WALL_TEX_SIZE;
@@ -618,6 +632,11 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
                 rect(gs, cx - headHalf * 0.7f, topY + headH * 0.68f, cx + headHalf * 0.7f, topY + headH * 0.78f, rgb(0, 0, 0));
         }
     }
+
+    // Indicador discreto da lanterna no canto inferior direito.
+    drawTextShadow(gs, W - 92.0f, H - 31.0f, 2.0f,
+                   g.flashlight ? rgb(255, 235, 145) : rgb(115, 115, 105),
+                   g.flashlight ? "LANT ON" : "LANT OFF");
 
     // borda vermelha de perigo
     if (g.nearest < 5.0f) {
