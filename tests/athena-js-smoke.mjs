@@ -108,4 +108,23 @@ assert.ok(generatedFiles.get("world.mtl").includes("newmtl floor"), "materiais d
 world.render(worldGame);
 assert.equal(renderBegins, 1, "renderer deve iniciar um passe 3D por quadro");
 
+
+const pipeMap = new Uint8Array(40 * 40);
+for (let x = 1; x <= 38; x++) pipeMap[20 * 40 + x] = 0;
+for (let y = 18; y <= 20; y++) pipeMap[y * 40 + 7] = 0;
+pipeMap[19 * 40 + 8] = 3;
+pipeMap[20 * 40 + 38] = 2;
+const pipeGame = {
+  level: 2, map: pipeMap, mapRevision: 2,
+  exitX: 38.5, exitY: 20.5,
+  px: 3.5, py: 20.5, dirX: 1, dirY: 0,
+  planeX: 0, planeY: 0.66, pitch: 0,
+  jumpHeight: 0, flashlight: false
+};
+world.rebuild(pipeGame);
+assert.equal(world.revision, 2, "troca para Pipe Dreams deve reconstruir a malha");
+assert.ok(generatedFiles.get("world.obj").includes("usemtl pipewall"), "Pipe Dreams deve usar paredes industriais");
+assert.ok(generatedFiles.get("world.obj").includes("usemtl lockerpanel"), "armario deve ter painel frontal");
+assert.ok(generatedFiles.get("world.mtl").includes("newmtl redlamp"), "Pipe Dreams deve incluir material de luz vermelha");
+
 console.log("Athena JS smoke tests: OK");
