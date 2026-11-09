@@ -116,7 +116,6 @@
       canvas.psm=Screen.CT32;
       canvas.psmz=Screen.Z16S;
       Screen.setMode(canvas);
-      Screen.initBuffers();
       Render.init();
       Render.setView(67,.1,90,canvas.width,canvas.height);
       light=Lights.new();
