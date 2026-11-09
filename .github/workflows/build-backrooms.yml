@@ -31,7 +31,7 @@ jobs:
             -v "$GITHUB_WORKSPACE/source/backrooms-ps2:/src" \
             -w /src \
             ps2dev/ps2dev:latest \
-            sh -lc 'apk add --no-cache make gmp mpc1 mpfr4 && make clean && make'
+            sh -lc 'apk add --no-cache make && export PS2DEV=/usr/local/ps2dev && export PS2SDK=$PS2DEV/ps2sdk && export GSKIT=$PS2DEV/gsKit && export PATH=$PATH:$PS2DEV/bin:$PS2DEV/ee/bin:$PS2DEV/iop/bin:$PS2DEV/dvp/bin:$PS2SDK/bin && command -v mips64r5900el-ps2-elf-g++ && make clean && make'
 
       - name: Verificar ELF
         run: |
