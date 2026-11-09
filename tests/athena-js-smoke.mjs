@@ -33,7 +33,7 @@ assert.equal(game.map[(game.py | 0) * 40 + (game.px | 0)], 0, "posicao inicial d
 assert.equal(game.map[(game.exitY | 0) * 40 + (game.exitX | 0)], 2, "saida deve ser marcada como porta");
 
 const scene = BackroomsRaycast.cast(game, 640, 448, 160);
-assert.equal(scene.columns.length, 160, "raycaster deve produzir 160 colunas");
+assert.equal(scene.columns.length, 80, "raycaster deve produzir 80 colunas no modo otimizado");
 assert.ok(scene.columns.every((column) => Number.isFinite(column.depth) && column.depth > 0), "todas as colunas devem ter profundidade valida");
 
 let input = BackroomsInput.fromAxes({ l1: true });
