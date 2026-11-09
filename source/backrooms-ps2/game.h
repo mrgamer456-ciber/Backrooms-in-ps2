@@ -14,6 +14,7 @@ constexpr float MAX_VIEW = 14.0f;
 struct Input {
     float moveX = 0, moveY = 0, turn = 0, lookY = 0;  // -1..1
     bool sprint = false;
+    bool toggleFlashlight = false;
     bool restart = false;
 };
 
@@ -62,6 +63,7 @@ struct Game {
     float dirX, dirY, planeX, planeY;
     float stamina;
     bool exhausted;
+    bool flashlight;
     int level;
     bool dead;
     float deadTime;
