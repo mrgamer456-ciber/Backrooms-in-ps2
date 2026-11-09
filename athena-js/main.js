@@ -21,11 +21,11 @@ import "audio.js";
       const now=Date.now();
       let dt=(now-lastTime)/1000;lastTime=now;
       if(dt<=0||dt>0.1)dt=1/60;
-      const input=pad?root.BackroomsInput.readPad(pad):root.BackroomsInput.fromAxes({});
+      const input=(pad&&Pads.isActive(0))?root.BackroomsInput.readPad(pad):root.BackroomsInput.fromAxes({});
       if(game.onTitle) {
         if(input.restart) {
           game.onTitle=false;
-          root.BackroomsGame.newGame(game,0x0B4C7200);
+          root.BackroomsGame.newGame(game,(Date.now()^0x0B4C7200)>>>0);
         }
       } else {
         root.BackroomsGame.update(game,input,dt);
