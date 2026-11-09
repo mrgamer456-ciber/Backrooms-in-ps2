@@ -5,18 +5,21 @@ import "font.js";
 import "render.js";
 import "audio.js";
 import "assets.js";
+import "world3d.js";
 
 // Ponto de entrada AthenaEnv. Athena executa main.js automaticamente.
 (function(root) {
   "use strict";
   function startBackroomsAthena() {
-    if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer||!root.BackroomsRaycast||!root.BackroomsAudio||!root.BackroomsAssets||!root.BackroomsFont)
-      throw new Error("Carregue game.js, input.js, raycast.js, render.js, audio.js, assets.js e font.js antes de main.js.");
+    if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer||!root.BackroomsRaycast||!root.BackroomsAudio||!root.BackroomsAssets||!root.BackroomsFont||!root.BackroomsWorld3D)
+      throw new Error("Carregue game.js, input.js, raycast.js, render.js, audio.js, assets.js, font.js e world3d.js antes de main.js.");
     const game=root.BackroomsGame.makeGame();
     const renderer=root.BackroomsRenderer.createRenderer();
     let textures=null;
     if(root.BackroomsAssets.create())textures=root.BackroomsAssets.load();
-    renderer.init(textures);
+    const world3d=root.BackroomsWorld3D.create();
+    world3d.init();
+    renderer.init(textures,world3d);
     const audio=root.BackroomsAudio.create();
     let pad=null;
     if(typeof Pads!=="undefined")pad=Pads.get(0);
@@ -34,6 +37,7 @@ import "assets.js";
       } else {
         root.BackroomsGame.update(game,input,dt);
       }
+      if(!game.onTitle&&world3d.revision!==game.mapRevision)world3d.rebuild(game);
       root.BackroomsAudio.update(audio,game,dt);
       renderer.draw(game);
     };
