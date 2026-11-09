@@ -74,7 +74,7 @@
       if(ty<.2)return null;
       return {x:w*.5*(1+tx/ty),size:h/ty,depth:ty};
     }
-    function drawSprites(g) {
+    function drawSprites(g,scene) {
       // Desenha primeiro os objetos distantes para manter a ordem de profundidade.
       const all=[];
       for(let i=0;i<g.items.length;i++)if(g.items[i].active) {
@@ -87,6 +87,9 @@
       }
       all.sort((a,b)=>b.p.depth-a.p.depth);
       for(const s of all) {
+        const centerCol=Math.max(0,Math.min(scene.columns.length-1,(s.p.x/(w/scene.columns.length))|0));
+        if(s.p.depth>=scene.columns[centerCol].depth)continue;
+        if(s.kind==="enemy"&&g.enemyHiddenTimer>0)continue;
         const size=Math.max(3,Math.min(h*1.2,s.p.size*.72));
         const x=s.p.x-size*.5,y=h*.5-size*.5;
         if(s.kind==="item") {
@@ -143,16 +146,54 @@
         if((n&3)!==0)rect(x,y,5+(n%35),1,i%2?dim:white);
       }
     }
+    function drawDoor(g,scene) {
+      const p=projectCenter(g,g.exitX,g.exitY);
+      if(!p)return;
+      const col=Math.max(0,Math.min(scene.columns.length-1,(p.x/(w/scene.columns.length))|0));
+      if(scene.columns[col].type!==2||p.depth>scene.columns[col].depth+0.8)return;
+      const dh=Math.min(h*1.5,p.size*.92),dw=dh*.55;
+      const x=p.x-dw*.5,y=h*.5-dh*.50;
+      rect(x-dw*.10,y-dh*.04,dw*1.20,dh*1.08,color(150,150,160));
+      rect(x-dw*.06,y-dh*.02,dw*1.12,dh*1.04,color(55,34,20));
+      rect(x,y,dw,dh,color(255,255,255));
+      rect(x+dw*.13,y+dh*.08,dw*.74,dh*.84,color(245,245,245));
+      rect(x+dw*.28,y+dh*.12,dw*.44,dh*.76,color(255,255,255));
+      rect(x-dw*.08,y-dh*.05,dw*1.16,dh*.035,color(255,255,255));
+    }
+    function drawCabinet(g,scene) {
+      if(g.level!==2||!g.cabinets.length)return;
+      const cab=g.cabinets[0],p=projectCenter(g,cab.x,cab.y);
+      if(!p)return;
+      const col=Math.max(0,Math.min(scene.columns.length-1,(p.x/(w/scene.columns.length))|0));
+      if(p.depth>=scene.columns[col].depth+0.6)return;
+      const hh=Math.min(h*1.2,p.size*.78),ww=hh*.48;
+      const x=p.x-ww*.5,y=h*.5-hh*.5;
+      rect(x-ww*.05,y-hh*.02,ww*1.10,hh*1.04,color(22,25,27));
+      rect(x,y,ww,hh,color(82,91,94));
+      rect(x+ww*.08,y+hh*.08,ww*.84,hh*.82,color(48,56,59));
+      rect(x+ww*.48,y+hh*.12,ww*.07,hh*.76,color(125,133,132));
+      rect(x+ww*.78,y+hh*.45,ww*.07,hh*.12,color(190,145,55));
+    }
     function drawHud(g) {
+      if(g.nearest<5) {
+        const danger=(5-g.nearest)*14;
+        rect(0,0,danger,h,color(120,0,0));
+        rect(w-danger,0,danger,h,color(120,0,0));
+      }
       rect(18,h-28,w*.22,8,color(25,25,20));
       rect(20,h-26,w*.18*Math.max(0,g.stamina),4,color(g.stamina<.25?210:190,g.stamina<.25?45:180,100));
       text(18,h-48,"NIVEL "+g.level,color(230,230,215),1);
+      if(g.calmTimer>0) {
+        rect(18,h-45,w*.22,7,color(20,20,20));
+        rect(20,h-43,w*.18*(g.calmTimer/5),3,color(60,140,255));
+      }
       if(g.msgTimer>0) {
-        const msg=g.msgId===1?"ENCONTRE A PORTA":g.msgId===2?"AGUA DE AMENDOA":g.msgId===3?"PIPE DREAMS":"";
-        if(msg)text(w*.5-65,h*.82,msg,color(245,245,225),1);
+        const msg=g.msgId===1?"ENCONTRE A PORTA ABERTA COM A LUZ BRANCA":g.msgId===2?"AGUA DE AMENDOA!":g.msgId===3?"NIVEL 2: PIPE DREAMS":"";
+        if(msg)text(w*.5-105,h*.78,msg,color(250,250,240),.8);
       }
       if(g.level===2&&Math.hypot(g.px-8.5,g.py-19.5)<2.5)
-        text(w*.5-70,h*.72,g.hiding?"APERTE QUADRADO PARA SAIR":"APERTE QUADRADO PARA SE ESCONDER",color(245,245,225),.8);
+        text(w*.5-75,h*.72,g.hiding?"APERTE QUADRADO PARA SAIR":"APERTE QUADRADO PARA SE ESCONDER",color(245,245,225),.7);
+      text(w-105,h-31,g.flashlight?"LANT ON":"LANT OFF",g.flashlight?color(255,235,145):color(115,115,105),.8);
     }
     function drawTitle() {
       rect(0,0,w,h,color(30,27,8));
@@ -189,8 +230,9 @@
         if(game.onTitle){drawTitle();return;}
         if(game.dead){drawDead(game);return;}
         const scene=root.BackroomsRaycast.cast(game,w,h,128);
-        drawBackground(game,scene);drawWalls(game,scene);drawSprites(game);
-        drawHand(game);drawVhs(game);drawHud(game);
+        drawBackground(game,scene);drawWalls(game,scene);
+        drawDoor(game,scene);drawCabinet(game,scene);drawSprites(game,scene);
+        drawHand(game);drawHud(game);drawVhs(game);
       }
     };
   }
