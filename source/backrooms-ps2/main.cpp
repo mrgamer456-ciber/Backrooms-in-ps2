@@ -159,7 +159,7 @@ static bk::Input readInput()
         bool l1Down = (b & PAD_L1) != 0;
         in.toggleFlashlight = l1Down && !l1WasDown;
         l1WasDown = l1Down;
-        in.restart = (b & (PAD_START | PAD_CROSS)) != 0;
+        in.restart = (b & PAD_START) != 0; // X nao corre nem reinicia a partida
     }
     return in;
 }
@@ -335,6 +335,56 @@ static void drawVhsOverlay(GSGLOBAL *gs, uint32_t frame)
     if ((frame % 47u) < 3u) {
         float y = H - 20.0f - hashf(frame) * 24.0f;
         rect(gs, 18, y, W * (0.18f + 0.55f * hashf(frame + 9u)), y + 1.0f, dim);
+    }
+}
+
+
+// Modelo em primeira pessoa: braco, mao e lanterna apontada para o corredor.
+static void drawHandFlashlight(GSGLOBAL *gs)
+{
+    const float W = (float)gs->Width, H = (float)gs->Height;
+    const float bob = sinf(g.walkDist * 9.0f) * 2.0f;
+    const float x = W - 8.0f, y = H + 8.0f + bob;
+
+    // Manga escura do jogador, saindo pelo canto inferior direito.
+    gsKit_prim_quad_3d(gs,
+        x - 70, y - 5, 1, x + 8, y - 82, 1,
+        x + 8, y + 8, 1, x - 48, y + 16, 1,
+        rgb(38, 39, 34));
+    // Costura e dobra da manga.
+    rect(gs, x - 67, y - 14, x - 48, y + 2, rgb(76, 73, 62));
+
+    // Palma e dedos envolvendo o cabo.
+    gsKit_prim_quad_3d(gs,
+        x - 111, y - 105, 1, x - 55, y - 119, 1,
+        x - 29, y - 76, 1, x - 77, y - 59, 1,
+        rgb(164, 112, 78));
+    rect(gs, x - 83, y - 91, x - 45, y - 76, rgb(190, 137, 99));
+    rect(gs, x - 101, y - 103, x - 83, y - 89, rgb(205, 151, 111));
+
+    // Corpo metalico da lanterna, em perspectiva, apontando para o centro.
+    gsKit_prim_quad_3d(gs,
+        x - 151, y - 145, 1, x - 126, y - 161, 1,
+        x - 54, y - 91, 1, x - 77, y - 69, 1,
+        rgb(42, 46, 48));
+    // Faixas de metal e anel frontal.
+    gsKit_prim_quad_3d(gs,
+        x - 145, y - 149, 1, x - 135, y - 155, 1,
+        x - 63, y - 87, 1, x - 73, y - 78, 1,
+        rgb(112, 119, 116));
+    gsKit_prim_quad_3d(gs,
+        x - 158, y - 139, 1, x - 142, y - 154, 1,
+        x - 128, y - 140, 1, x - 143, y - 125, 1,
+        rgb(24, 27, 28));
+
+    // Lente: acende e ganha halo quando a lanterna esta ligada.
+    if (g.flashlight) {
+        rect(gs, x - 169, y - 153, x - 126, y - 111, rgb(255, 226, 133));
+        rect(gs, x - 164, y - 148, x - 132, y - 116, rgb(255, 255, 220));
+        rect(gs, x - 177, y - 161, x - 119, y - 103, rgb(160, 132, 70));
+    } else {
+        rect(gs, x - 164, y - 148, x - 132, y - 116, rgb(49, 55, 55));
+        rect(gs, x - 158, y - 142, x - 138, y - 122, rgb(20, 24, 25));
     }
 }
 
@@ -632,6 +682,9 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
                 rect(gs, cx - headHalf * 0.7f, topY + headH * 0.68f, cx + headHalf * 0.7f, topY + headH * 0.78f, rgb(0, 0, 0));
         }
     }
+
+    // Modelo da mao segurando a lanterna em primeira pessoa.
+    drawHandFlashlight(gs);
 
     // Indicador discreto da lanterna no canto inferior direito.
     drawTextShadow(gs, W - 92.0f, H - 31.0f, 2.0f,
