@@ -404,7 +404,7 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
 
     // Teto do Level 1: superficie amarelo-creme lisa, diferente do papel de parede.
     // O horizonte acompanha a inclinacao vertical do analógico direito.
-    float horizon = H * (0.5f + g.pitch) + g.jumpHeight * H * 0.35f;
+    float horizon = H * (0.5f + g.pitch) + g.jumpHeight * H * 0.55f;
     if (horizon < H * 0.12f) horizon = H * 0.12f;
     if (horizon > H * 0.90f) horizon = H * 0.90f;
     const int bands = 16;
