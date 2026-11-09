@@ -132,14 +132,14 @@
     function drawHand(g) {
       // Mesmas proporcoes e pontos do modelo de mao/lanterna aprovado no C++.
       const bob=Math.sin(g.walkDist*9)*2,x=w-8,y=h+8+bob;
-      Draw.quad(x-70,y-5,x+8,y-82,x+8,y+8,x-48,y+16,color(38,39,34));
+      Draw.quad(x-70,y-5,x+8,y-82,x+8,y+8,x-48,y+16,color(38,39,34),color(38,39,34),color(38,39,34),color(38,39,34));
       rect(x-67,y-14,19,16,color(76,73,62));
-      Draw.quad(x-111,y-105,x-55,y-119,x-29,y-76,x-77,y-59,color(164,112,78));
+      Draw.quad(x-111,y-105,x-55,y-119,x-29,y-76,x-77,y-59,color(164,112,78),color(164,112,78),color(164,112,78),color(164,112,78));
       rect(x-83,y-91,38,15,color(190,137,99));
       rect(x-101,y-103,18,14,color(205,151,111));
-      Draw.quad(x-151,y-145,x-126,y-161,x-54,y-91,x-77,y-69,color(42,46,48));
-      Draw.quad(x-145,y-149,x-135,y-155,x-63,y-87,x-73,y-78,color(112,119,116));
-      Draw.quad(x-158,y-139,x-142,y-154,x-128,y-140,x-143,y-125,color(24,27,28));
+      Draw.quad(x-151,y-145,x-126,y-161,x-54,y-91,x-77,y-69,color(42,46,48),color(42,46,48),color(42,46,48),color(42,46,48));
+      Draw.quad(x-145,y-149,x-135,y-155,x-63,y-87,x-73,y-78,color(112,119,116),color(112,119,116),color(112,119,116),color(112,119,116));
+      Draw.quad(x-158,y-139,x-142,y-154,x-128,y-140,x-143,y-125,color(24,27,28),color(24,27,28),color(24,27,28),color(24,27,28));
       if(g.flashlight) {
         rect(x-177,y-161,58,58,color(160,132,70));
         rect(x-169,y-153,43,42,color(255,226,133));
