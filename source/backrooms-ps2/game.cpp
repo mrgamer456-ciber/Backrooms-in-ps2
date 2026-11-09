@@ -74,9 +74,33 @@ static void computeDistances(Game& g) {
 
 static void generate(Game& g) {
     memset(g.map, 1, sizeof(g.map));
+    g.cabinetCount = 0;
+    g.hiding = false;
+    g.hiddenCabinet = -1;
     int prevCx = 0, prevCy = 0;
     const bool pipeDreams = (g.level == 2);
-    const int roomCount = pipeDreams ? 27 : 22;
+
+    // Pipe Dreams: corredor principal comprido, com alcovas laterais de manutencao.
+    // O percurso segue em linha reta ate a porta no extremo oposto.
+    if (pipeDreams) {
+        carveRect(g, 2, 19, 37, 21);
+        carveRect(g, 7, 15, 10, 19);
+        carveRect(g, 14, 21, 17, 25);
+        carveRect(g, 22, 15, 25, 19);
+        carveRect(g, 30, 21, 33, 25);
+        g.px = 3.5f;
+        g.py = 20.5f;
+        g.angle = 0.0f;
+        g.cabinets[0] = {8.5f, 18.2f, true};
+        g.cabinets[1] = {15.5f, 22.0f, true};
+        g.cabinets[2] = {23.5f, 18.2f, true};
+        g.cabinets[3] = {31.5f, 22.0f, true};
+        g.cabinetCount = 4;
+        g.exitX = 37.5f;
+        g.exitY = 20.5f;
+        g.map[20][37] = 2;
+    } else {
+    const int roomCount = 22;
     for (int i = 0; i < roomCount; i++) {
         int w = pipeDreams ? rndRange(g, 3, 5) : rndRange(g, 3, 8);
         int h = pipeDreams ? rndRange(g, 3, 5) : rndRange(g, 3, 8);
@@ -101,6 +125,7 @@ static void generate(Game& g) {
         prevCx = cx;
         prevCy = cy;
     }
+    }
 
     // Pilares somente no Nivel 1; no Pipe Dreams os corredores devem permanecer estreitos.
     if (!pipeDreams) {
@@ -116,6 +141,9 @@ static void generate(Game& g) {
             }
     }
 
+    // A saida de Pipe Dreams ja fica no final do corredor principal.
+    // No Nivel 1 ela continua sendo escolhida longe do ponto inicial.
+    if (!pipeDreams) {
     // porta de saida: parede encostada em chao, longe do jogador
     g.exitX = -100;
     g.exitY = -100;
@@ -135,6 +163,7 @@ static void generate(Game& g) {
         g.map[bestY][bestX] = 2;
         g.exitX = bestX + 0.5f;
         g.exitY = bestY + 0.5f;
+    }
     }
 
     // anomalias, longe do jogador
@@ -198,6 +227,10 @@ void newGame(Game& g, uint32_t seed) {
     g.stamina = 1.0f;
     g.exhausted = false;
     g.flashlight = false;
+    g.hiding = false;
+    g.hiddenCabinet = -1;
+    g.jumpHeight = 0.0f;
+    g.jumpVelocity = 0.0f;
     g.angle = 0;
     g.pitch = 0;
     startLevel(g);
@@ -238,6 +271,38 @@ void update(Game& g, const Input& in, float dt) {
     }
     g.survived += dt;
     if (in.toggleFlashlight) g.flashlight = !g.flashlight;
+
+    // Pulo com gravidade: X dispara uma vez por pressionamento.
+    if (in.jump && g.jumpHeight <= 0.001f && !g.hiding) g.jumpVelocity = 3.25f;
+    if (g.jumpVelocity != 0.0f || g.jumpHeight > 0.0f) {
+        g.jumpHeight += g.jumpVelocity * dt;
+        g.jumpVelocity -= 8.5f * dt;
+        if (g.jumpHeight <= 0.0f) { g.jumpHeight = 0.0f; g.jumpVelocity = 0.0f; }
+    }
+
+    // Quadrado: entrar no armario mais proximo ou sair dele.
+    if (in.interact && g.level == 2) {
+        if (g.hiding) {
+            g.hiding = false;
+            g.hiddenCabinet = -1;
+        } else {
+            for (int i = 0; i < g.cabinetCount; i++) {
+                float dx = g.cabinets[i].x - g.px, dy = g.cabinets[i].y - g.py;
+                if (dx*dx + dy*dy < 2.0f*2.0f) {
+                    g.hiding = true;
+                    g.hiddenCabinet = i;
+                    g.jumpHeight = 0.0f;
+                    g.jumpVelocity = 0.0f;
+                    break;
+                }
+            }
+        }
+    }
+    if (g.hiding) {
+        if (g.msgTimer > 0) g.msgTimer -= dt;
+        return; // anomalias nao alcancam o jogador enquanto ele esta escondido
+    }
+
     g.angle += in.turn * TURN_SPEED * dt;
     g.pitch += in.lookY * 1.35f * dt;
     if (g.pitch > 0.38f) g.pitch = 0.38f;
