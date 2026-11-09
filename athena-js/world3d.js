@@ -141,9 +141,9 @@
       Camera.position(game.px,eyeY,game.py);
       Camera.target(game.px+game.dirX,eyeY+game.pitch*2.0,game.py+game.dirY);
       Camera.update();
-      Lights.set(0,Lights.AMBIENT,game.level===2?.16:.24,game.level===2?.12:.22,game.level===2?.12:.18);
+      Lights.set(0,Lights.AMBIENT,game.level===2 ? 0.16 : 0.24,game.level===2 ? 0.12 : 0.22,game.level===2 ? 0.12 : 0.18);
       Lights.set(1,Lights.DIRECTION,-game.dirX,-.35,-game.dirY);
-      const diffuse=game.flashlight?.92:.28;
+      const diffuse=game.flashlight ? 0.92 : 0.28;
       Lights.set(1,Lights.DIFFUSE,diffuse,diffuse*.94,diffuse*.82);
       Render.begin();
       rootNode.update();
