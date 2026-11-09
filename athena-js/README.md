@@ -37,7 +37,7 @@ Nao e necessario compilar um ELF do jogo: o AthenaEnv executa os scripts JavaScr
 
 ## Estado real desta conversao
 
-**Ainda nao e a versao final nem foi validada no PS2.** O loop de entrada, atualizacao e desenho esta conectado. O cenario e uma malha 3D gerada a partir do mapa e enviada ao renderer VU1: paredes texturizadas, piso, teto, porta, armario e luminarias. O raycaster continua sendo usado para profundidade e projecao dos sprites; HUD VHS, itens, anomalias e a mao/lanterna ficam como camada 2D por cima.
+**Ainda nao e a versao final nem foi validada no AthenaEnv/PS2.** O repositorio tem verificacoes automatizadas de sintaxe, logica, normalizacao dos analogicos e geracao da malha 3D usando mocks; esses testes nao substituem a execucao real no console. O loop de entrada, atualizacao e desenho esta conectado. O cenario e uma malha 3D gerada a partir do mapa e enviada ao renderer VU1: paredes texturizadas, piso, teto, porta, armario e luminarias. O raycaster continua sendo usado para profundidade e projecao dos sprites; HUD VHS, itens, anomalias e a mao/lanterna ficam como camada 2D por cima.
 
 O personagem continua no formato em primeira pessoa ja existente no projeto: camera do jogador e mao/lanterna desenhada. Nao trocar por Steve ou Alex. A logica, a porta e a geometria precisam de validacao visual no AthenaEnv/PS2. O audio procedural tambem precisa de teste no console.
 
