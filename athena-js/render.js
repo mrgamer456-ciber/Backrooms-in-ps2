@@ -3,7 +3,7 @@
 (function(root) {
   "use strict";
   function createRenderer() {
-    let initialized=false,w=640,h=448,frame=0,wallTexture=null,pipeTexture=null;
+    let initialized=false,w=640,h=448,frame=0,wallTexture=null,pipeTexture=null,world3d=null;
     const color=(r,g,b,a)=>Color.new(
       Math.max(0,Math.min(255,r|0)),Math.max(0,Math.min(255,g|0)),
       Math.max(0,Math.min(255,b|0)),a===undefined?128:a);
@@ -345,13 +345,14 @@
       if(g.deadTime>1.5&&(frame/30|0)%2===0)centered(h*.91,"APERTE START",color(240,240,240),2);
     }
     return {
-      init(textures) {
+      init(textures,world) {
         if(typeof Screen==="undefined"||typeof Draw==="undefined"||typeof Color==="undefined"||!root.BackroomsFont)
           throw new Error("AthenaEnv precisa dos modulos Screen, Draw, Color e fonte bitmap.");
         Screen.setParam(Screen.DEPTH_TEST_ENABLE,false);
         Screen.setVSync(true);
         const mode=Screen.getMode();w=mode.width;h=mode.height;
         if(textures){wallTexture=textures.wall||null;pipeTexture=textures.pipe||null;}
+        world3d=world||null;
         initialized=true;
       },
       draw(game) {
@@ -359,9 +360,15 @@
         frame++;Screen.clear(color(0,0,0));
         if(game.onTitle){drawTitle();Screen.flip();return;}
         if(game.dead){drawDead(game);Screen.flip();return;}
-        const scene=root.BackroomsRaycast.cast(game,w,h,160);
-        drawBackground(game,scene);drawWalls(game,scene);
-        drawDoor(game,scene);drawCabinet(game,scene);drawSprites(game,scene);
+        if(world3d&&world3d.ready) {
+          world3d.render(game);
+          const scene=root.BackroomsRaycast.cast(game,w,h,160);
+          drawSprites(game,scene);
+        } else {
+          const scene=root.BackroomsRaycast.cast(game,w,h,160);
+          drawBackground(game,scene);drawWalls(game,scene);
+          drawDoor(game,scene);drawCabinet(game,scene);drawSprites(game,scene);
+        }
         drawHand(game);drawHud(game);drawVhs(game);
         Screen.flip();
       }
