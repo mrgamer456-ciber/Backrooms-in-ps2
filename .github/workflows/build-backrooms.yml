@@ -27,29 +27,27 @@ jobs:
           test -f source/backrooms-ps2/Makefile
           find source/backrooms-ps2 -maxdepth 2 -type f | sort
 
-      - name: Compilar com PS2SDK
+      - name: Compilar versao normal e versao de diagnostico
         run: |
+          mkdir -p output
           docker run --rm \
             -v "$GITHUB_WORKSPACE/source/backrooms-ps2:/src" \
+            -v "$GITHUB_WORKSPACE/output:/out" \
             -w /src \
             ps2dev/ps2dev:latest \
-            sh -lc 'apk add --no-cache make && export PS2DEV=/usr/local/ps2dev && export PS2SDK=$PS2DEV/ps2sdk && export GSKIT=$PS2DEV/gsKit && export PATH=$PATH:$PS2DEV/bin:$PS2DEV/ee/bin:$PS2DEV/iop/bin:$PS2DEV/dvp/bin:$PS2SDK/bin && command -v mips64r5900el-ps2-elf-g++ && make clean && make'
+            sh -lc 'apk add --no-cache make && export PS2DEV=/usr/local/ps2dev && export PS2SDK=$PS2DEV/ps2sdk && export GSKIT=$PS2DEV/gsKit && export PATH=$PATH:$PS2DEV/bin:$PS2DEV/ee/bin:$PS2DEV/iop/bin:$PS2DEV/dvp/bin:$PS2SDK/bin && command -v mips64r5900el-ps2-elf-g++ && make clean && make && cp backrooms.elf /out/backrooms-normal.elf && make clean && make USE_AUDIO=0 USE_WALL_TEXTURE=0 && cp backrooms.elf /out/backrooms-diagnostico.elf'
 
-      - name: Verificar ELF
+      - name: Verificar ELFs
         run: |
-          ELF="$(find source/backrooms-ps2 -maxdepth 2 -type f -iname '*.elf' -print -quit)"
-          if [ -z "$ELF" ]; then
-            echo "::error::A compilacao terminou sem gerar nenhum arquivo ELF."
-            exit 1
-          fi
-          mkdir -p output
-          cp "$ELF" output/backrooms.elf
-          file output/backrooms.elf
+          test -s output/backrooms-normal.elf
+          test -s output/backrooms-diagnostico.elf
+          file output/backrooms-normal.elf
+          file output/backrooms-diagnostico.elf
 
-      - name: Disponibilizar ELF
+      - name: Disponibilizar ELFs
         uses: actions/upload-artifact@v4
         with:
-          name: Backrooms-PS2-ELF
-          path: output/backrooms.elf
+          name: Backrooms-PS2-ELFs
+          path: output/*.elf
           if-no-files-found: error
           retention-days: 30
