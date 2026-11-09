@@ -50,26 +50,38 @@ static void initModules()
 #endif
 }
 
+static bool padOpened = false;
+static bool padModeRequested = false;
+
+// A deteccao de alguns controles paralelos demora mais que a inicializacao
+// do jogo. Por isso, a troca para analogico e tentada durante o jogo tambem.
 static void initPad()
 {
     padInit(0);
-    if (padPortOpen(0, 0, padBuf) == 0) return;
+    padOpened = (padPortOpen(0, 0, padBuf) != 0);
+}
 
-    // Aguarda o controle ser identificado antes de solicitar o modo analogico.
-    // FINDCTP1 ainda e uma etapa de deteccao; mudar o modo nesse ponto pode falhar.
-    for (int i = 0; i < 300; ++i) {
-        if (padGetState(0, 0) == PAD_STATE_STABLE) break;
+static void updatePadMode()
+{
+    if (!padOpened) return;
+
+    int state = padGetState(0, 0);
+    if (state != PAD_STATE_STABLE) {
+        // Se o controle ainda esta sendo detectado ou foi desconectado,
+        // permite uma nova tentativa quando voltar a ficar estavel.
+        padModeRequested = false;
+        return;
     }
 
-    if (padGetState(0, 0) != PAD_STATE_STABLE) return;
+    int mode = padInfoMode(0, 0, PAD_MODECURID, 0);
+    if (mode == PAD_TYPE_DUALSHOCK) {
+        padModeRequested = true;
+        return;
+    }
 
-    // Solicita DualShock/analogico e aguarda o PADMAN concluir a troca de modo.
-    padSetMainMode(0, 0, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
-    for (int i = 0; i < 120; ++i) {
-        if (padGetState(0, 0) == PAD_STATE_STABLE &&
-            padInfoMode(0, 0, PAD_MODECURID, 0) == PAD_TYPE_DUALSHOCK) {
-            return;
-        }
+    if (!padModeRequested) {
+        padSetMainMode(0, 0, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
+        padModeRequested = true;
     }
 }
 
@@ -126,6 +138,7 @@ static float clamp1(float v) { return v < -1.0f ? -1.0f : (v > 1.0f ? 1.0f : v);
 
 static bk::Input readInput()
 {
+    updatePadMode();
     bk::Input in;
     struct padButtonStatus pad;
     if (padGetState(0, 0) == PAD_STATE_STABLE && padRead(0, 0, &pad) != 0) {
