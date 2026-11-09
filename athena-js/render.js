@@ -3,7 +3,7 @@
 (function(root) {
   "use strict";
   function createRenderer() {
-    let initialized=false,w=640,h=448,font=null,frame=0,wallTexture=null,pipeTexture=null;
+    let initialized=false,w=640,h=448,frame=0,wallTexture=null,pipeTexture=null;
     const color=(r,g,b,a)=>Color.new(
       Math.max(0,Math.min(255,r|0)),Math.max(0,Math.min(255,g|0)),
       Math.max(0,Math.min(255,b|0)),a===undefined?128:a);
@@ -11,8 +11,10 @@
       if(rw>0&&rh>0)Draw.rect(x,y,rw,rh,c);
     };
     function text(x,y,s,c,scale) {
-      if(!font)return;
-      font.color=c;font.scale=scale||1;font.print(x,y,s);
+      root.BackroomsFont.shadow(x,y,scale||1,c,s);
+    }
+    function centered(y,s,c,scale) {
+      root.BackroomsFont.centered(y,scale||1,c,s,w);
     }
     function drawBackground(g,scene) {
       const horizon=scene.horizon;
@@ -173,14 +175,14 @@
       rect(pad,h-pad-3,54,3,white);rect(pad,h-pad-35,3,35,white);
       rect(w-pad-54,h-pad-3,54,3,white);rect(w-pad-3,h-pad-35,3,35,white);
       if((frame/25|0)%2===0)rect(38,30,12,12,color(235,22,18));
-      text(60,25,"REC",white,1.5);
+      text(60,27,"REC",white,3);
       const bx=w-68,by=27;
       rect(bx,by,43,19,white);rect(bx+43,by+5,4,9,white);
       rect(bx+3,by+3,37,13,color(25,28,22));
       for(let i=0;i<3;i++)rect(bx+5+i*11,by+5,9,9,color(190,220,178));
       const sec=Math.max(1,g.survived|0);
       const clock=("0"+((sec/3600)|0)).slice(-2)+":"+("0"+(((sec/60)|0)%60)).slice(-2)+":"+("0"+(sec%60)).slice(-2);
-      text(35,h-70,clock,white,1.5);
+      text(35,h-69,clock,white,3);
       for(let i=0;i<7;i++) {
         const n=(frame*37+i*7919)>>>0;
         const x=(n%Math.max(1,w-45)),y=54+((n>>>8)%(Math.max(1,h-108)));
@@ -223,27 +225,27 @@
       }
       rect(18,h-28,w*.22,8,color(25,25,20));
       rect(20,h-26,w*.18*Math.max(0,g.stamina),4,color(g.stamina<.25?210:190,g.stamina<.25?45:180,100));
-      text(18,h-48,"NIVEL "+g.level,color(230,230,215),1);
+      text(20,16,"NIVEL "+g.level,color(240,240,220),2);
       if(g.calmTimer>0) {
         rect(18,h-45,w*.22,7,color(20,20,20));
         rect(20,h-43,w*.18*(g.calmTimer/5),3,color(60,140,255));
       }
       if(g.msgTimer>0) {
         const msg=g.msgId===1?"ENCONTRE A PORTA ABERTA COM A LUZ BRANCA":g.msgId===2?"AGUA DE AMENDOA!":g.msgId===3?"NIVEL 2: PIPE DREAMS":"";
-        if(msg)text(w*.5-105,h*.78,msg,color(250,250,240),.8);
+        if(msg)centered(h*.78,msg,color(250,250,240),3);
       }
       if(g.level===2&&Math.hypot(g.px-8.5,g.py-19.5)<2.5)
-        text(w*.5-75,h*.72,g.hiding?"APERTE QUADRADO PARA SAIR":"APERTE QUADRADO PARA SE ESCONDER",color(245,245,225),.7);
-      text(w-105,h-31,g.flashlight?"LANT ON":"LANT OFF",g.flashlight?color(255,235,145):color(115,115,105),.8);
+        centered(h*.72,g.hiding?"APERTE QUADRADO PARA SAIR":"APERTE QUADRADO PARA SE ESCONDER",color(245,245,225),2);
+      text(w-92,h-31,g.flashlight?"LANT ON":"LANT OFF",g.flashlight?color(255,235,145):color(115,115,105),2);
     }
     function drawTitle() {
       rect(0,0,w,h,color(30,27,8));
       rect(0,h*.28,w,h*.32,color(205,186,84));
-      text(w*.5-82,h*.35,"BACKROOMS",color(50,40,5),2);
-      text(w*.5-34,h*.51,"NIVEL 0",color(90,75,15),1.3);
-      if((frame/30|0)%2===0)text(w*.5-80,h*.69,"APERTE START OU R2",color(240,240,240),1);
-      text(w*.5-115,h*.82,"ANALOGICO DIREITO: OLHAR E VIRAR",color(200,200,190),.7);
-      text(w*.5-88,h*.88,"R1: CORRER  L1: LANTERNA",color(200,200,190),.8);
+      centered(h*.34,"BACKROOMS",color(50,40,5),8);
+      centered(h*.50,"NIVEL 0",color(90,75,15),3);
+      if((frame/30|0)%2===0)centered(h*.68,"APERTE START OU R2",color(240,240,240),3);
+      centered(h*.80,"ANALOGICO DIREITO: OLHAR E VIRAR",color(200,200,190),2);
+      centered(h*.86,"R1: CORRER  L1: LANTERNA",color(200,200,190),2);
     }
     function drawDead(g) {
       rect(0,0,w,h,color(0,0,0));
@@ -257,18 +259,17 @@
       if(!stalker)rect(cx-size*.34,top+size*.9*.62,size*.68,size*.9*.10,color(0,0,0));
       const sec=g.survived|0;
       const clock=("0"+((sec/60)|0)).slice(-2)+":"+("0"+(sec%60)).slice(-2);
-      text(w*.5-75,h*.74,"VOCE FOI PEGO",color(200,20,20),1.5);
-      text(w*.5-85,h*.84,"NIVEL "+g.level+"  TEMPO "+clock,color(220,220,220),1);
-      if(g.deadTime>1.5&&(frame/30|0)%2===0)text(w*.5-55,h*.92,"APERTE START",color(240,240,240),1);
+      centered(h*.74,"VOCE FOI PEGO",color(200,20,20),4);
+      centered(h*.84,"NIVEL "+g.level+"  TEMPO "+clock,color(220,220,220),2);
+      if(g.deadTime>1.5&&(frame/30|0)%2===0)centered(h*.91,"APERTE START",color(240,240,240),2);
     }
     return {
       init(textures) {
-        if(typeof Screen==="undefined"||typeof Draw==="undefined"||typeof Font==="undefined"||typeof Color==="undefined")
+        if(typeof Screen==="undefined"||typeof Draw==="undefined"||typeof Color==="undefined"||!root.BackroomsFont)
           throw new Error("AthenaEnv precisa dos modulos Screen, Draw, Font e Color.");
         Screen.setParam(Screen.DEPTH_TEST_ENABLE,false);
         Screen.setVSync(true);
         const mode=Screen.getMode();w=mode.width;h=mode.height;
-        font=new Font("default");font.scale=1;
         if(textures){wallTexture=textures.wall||null;pipeTexture=textures.pipe||null;}
         initialized=true;
       },
