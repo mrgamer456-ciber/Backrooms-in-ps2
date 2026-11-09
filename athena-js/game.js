@@ -61,6 +61,17 @@
           while(yy!==cy){carve(g,xx,yy,xx+1,yy+1);yy+=cy>yy?1:-1;}}
         pcx=cx;pcy=cy;
       }
+      // Pilares aleatorios somente no nivel 1, como no codigo C++ original.
+      if(g.level!==2) {
+        for(let y=2;y<H-2;y++) for(let x=2;x<W-2;x++) {
+          if(g.map[at(x,y)]!==0||rnd(g)%9!==0)continue;
+          if(Math.abs(x-(g.px|0))<=1&&Math.abs(y-(g.py|0))<=1)continue;
+          let open=true;
+          for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)
+            if(g.map[at(x+dx,y+dy)]!==0)open=false;
+          if(open)g.map[at(x,y)]=1;
+        }
+      }
       let best=-1,bx=-1,by=-1;
       for(let t=0;t<4000;t++){const x=range(g,1,W-2),y=range(g,1,H-2);
         if(g.map[at(x,y)]!==1)continue;
