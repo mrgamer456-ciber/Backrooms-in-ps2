@@ -109,16 +109,14 @@
     return out.join("\n");
   }
   function create() {
-    let ready=false,revision=-1,batch=null,rootNode=null,data=null,obj=null,light=null;
+    let ready=false,revision=-1,batch=null,rootNode=null,data=null,obj=null;
     function init() {
       const canvas=Screen.getMode();
       canvas.zbuffering=true;
-      canvas.psm=Screen.CT32;
       canvas.psmz=Screen.Z16S;
       Screen.setMode(canvas);
       Render.init();
       Render.setView(67,.1,90,canvas.width,canvas.height);
-      light=Lights.new();
       batch=new Batch({autoSort:true});
       rootNode=new SceneNode();
       ready=true;
@@ -147,10 +145,10 @@
       Camera.position(game.px,eyeY,game.py);
       Camera.target(game.px+game.dirX,eyeY+game.pitch*2.0,game.py+game.dirY);
       Camera.update();
-      Lights.set(light,Lights.AMBIENT,game.level===2 ? 0.16 : 0.24,game.level===2 ? 0.12 : 0.22,game.level===2 ? 0.12 : 0.18);
-      Lights.set(light,Lights.DIRECTION,-game.dirX,-.35,-game.dirY);
+      Lights.set(0,Lights.AMBIENT,game.level===2 ? 0.16 : 0.24,game.level===2 ? 0.12 : 0.22,game.level===2 ? 0.12 : 0.18);
+      Lights.set(0,Lights.DIRECTION,-game.dirX,-.35,-game.dirY);
       const diffuse=game.flashlight ? 0.92 : 0.28;
-      Lights.set(light,Lights.DIFFUSE,diffuse,diffuse*.94,diffuse*.82);
+      Lights.set(0,Lights.DIFFUSE,diffuse,diffuse*.94,diffuse*.82);
       rootNode.update();
       batch.render();
       Screen.setParam(Screen.DEPTH_TEST_ENABLE,false);
