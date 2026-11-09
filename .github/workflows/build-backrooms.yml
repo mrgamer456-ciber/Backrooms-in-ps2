@@ -1,10 +1,10 @@
-name: Extrair e compilar Backrooms PS2
+name: 2 - Compilar Backrooms PS2 ELF
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - '**.zip'
+      - 'source/backrooms-ps2/**'
       - '.github/workflows/build-backrooms.yml'
 
 permissions:
@@ -14,70 +14,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar repositorio
+      - name: Baixar codigo extraido
         uses: actions/checkout@v4
 
-      - name: Localizar e extrair o ZIP
-        shell: bash
+      - name: Verificar fontes
         run: |
-          set -euo pipefail
-          ZIP="$(find . -maxdepth 2 -type f -iname '*.zip' ! -path './.git/*' | head -n 1)"
-          if [ -z "$ZIP" ]; then
-            echo "::error::Nenhum arquivo ZIP encontrado. Envie backrooms-ps2-v0.3.zip para a raiz do repositorio e execute o workflow novamente."
+          test -f source/backrooms-ps2/Makefile
+          find source/backrooms-ps2 -maxdepth 2 -type f | sort
+
+      - name: Compilar com PS2SDK
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE/source/backrooms-ps2:/src" \
+            -w /src \
+            ps2dev/ps2dev:latest \
+            sh -lc 'apk add --no-cache make gmp mpc1 mpfr4 && make clean && make'
+
+      - name: Verificar ELF
+        run: |
+          ELF="$(find source/backrooms-ps2 -maxdepth 2 -type f -iname '*.elf' -print -quit)"
+          if [ -z "$ELF" ]; then
+            echo "::error::A compilacao terminou sem gerar nenhum arquivo ELF."
             exit 1
           fi
-          echo "ZIP encontrado: $ZIP"
-          mkdir -p extracted
-          unzip -q "$ZIP" -d extracted
-          MAKEFILE="$(find extracted -type f -name Makefile -print -quit)"
-          if [ -z "$MAKEFILE" ]; then
-            echo "::error::O ZIP foi extraido, mas nao contem Makefile."
-            exit 1
-          fi
-          PROJECT_DIR="$(dirname "$MAKEFILE")"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-          echo "Projeto encontrado em: $PROJECT_DIR"
-          ls -la "$PROJECT_DIR"
-
-      - name: Compilar ELF com audio e texturas
-        id: full
-        continue-on-error: true
-        run: |
-          docker run --rm \
-            -v "$GITHUB_WORKSPACE:/src" \
-            -w "/src/$PROJECT_DIR" \
-            ps2dev/ps2dev:latest \
-            sh -lc 'make clean && make'
-
-      - name: Compilar sem audio (fallback)
-        if: steps.full.outcome == 'failure'
-        id: no_audio
-        continue-on-error: true
-        run: |
-          docker run --rm \
-            -v "$GITHUB_WORKSPACE:/src" \
-            -w "/src/$PROJECT_DIR" \
-            ps2dev/ps2dev:latest \
-            sh -lc 'make clean && make USE_AUDIO=0'
-
-      - name: Compilar sem audio e sem textura (ultimo fallback)
-        if: steps.full.outcome == 'failure' && steps.no_audio.outcome == 'failure'
-        run: |
-          docker run --rm \
-            -v "$GITHUB_WORKSPACE:/src" \
-            -w "/src/$PROJECT_DIR" \
-            ps2dev/ps2dev:latest \
-            sh -lc 'make clean && make USE_AUDIO=0 USE_WALL_TEXTURE=0'
-
-      - name: Validar ELF
-        run: |
-          ELF="$PROJECT_DIR/backrooms.elf"
-          test -s "$ELF" || { echo "::error::O arquivo backrooms.elf nao foi gerado."; exit 1; }
-          file "$ELF"
           mkdir -p output
           cp "$ELF" output/backrooms.elf
+          file output/backrooms.elf
 
-      - name: Publicar ELF para download
+      - name: Disponibilizar ELF
         uses: actions/upload-artifact@v4
         with:
           name: Backrooms-PS2-ELF
