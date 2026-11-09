@@ -6,7 +6,7 @@ const load = (path) => vm.runInThisContext(fs.readFileSync(path, "utf8"), { file
 
 
 const mainSource = fs.readFileSync("athena-js/main.js", "utf8");
-const importedModules = [...mainSource.matchAll(/import\\s+["']([^"']+)["'];/g)].map((match) => match[1]);
+const importedModules = [...mainSource.matchAll(/import\s+["']([^"']+)["'];/g)].map((match) => match[1]);
 assert.deepEqual(importedModules, [
   "game.js", "input.js", "raycast.js", "font.js",
   "render.js", "audio.js", "assets.js", "world3d.js"
