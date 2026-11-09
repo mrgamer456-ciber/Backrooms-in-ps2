@@ -55,14 +55,23 @@ static void initPad()
     padInit(0);
     if (padPortOpen(0, 0, padBuf) == 0) return;
 
-    // Nunca trava a inicializacao do video esperando o controle.
-    // Alguns controles/adaptadores demoram ou nao chegam a PAD_STATE_STABLE.
+    // Aguarda o controle ser identificado antes de solicitar o modo analogico.
+    // FINDCTP1 ainda e uma etapa de deteccao; mudar o modo nesse ponto pode falhar.
+    for (int i = 0; i < 300; ++i) {
+        if (padGetState(0, 0) == PAD_STATE_STABLE) break;
+        DelayThread(1000);
+    }
+
+    if (padGetState(0, 0) != PAD_STATE_STABLE) return;
+
+    // Solicita DualShock/analogico e aguarda o PADMAN concluir a troca de modo.
+    padSetMainMode(0, 0, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
     for (int i = 0; i < 120; ++i) {
-        int state = padGetState(0, 0);
-        if (state == PAD_STATE_STABLE || state == PAD_STATE_FINDCTP1) {
-            padSetMainMode(0, 0, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
+        if (padGetState(0, 0) == PAD_STATE_STABLE &&
+            padInfoMode(0, 0, PAD_MODECURID, 0) == PAD_TYPE_DUALSHOCK) {
             return;
         }
+        DelayThread(1000);
     }
 }
 
