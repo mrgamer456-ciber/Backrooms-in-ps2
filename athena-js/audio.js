@@ -77,7 +77,8 @@
   }
   function play(stream) {
     if(!stream)return;
-    if(stream.playing())stream.rewind();
+    if(stream.playing())return;
+    stream.rewind();
     stream.play();
   }
   function update(state,game,dt) {
@@ -95,7 +96,7 @@
     if(!game.dead&&game.nearest<9) {
       const bpm=60+(9-game.nearest)*13;
       state.heartTimer-=dt;
-      if(state.heartTimer<=0){play(state.heart);state.heartTimer+=60/bpm;}
+      if(state.heartTimer<=0){play(state.heart);state.heartTimer+=Math.max(0.65,60/bpm);}
     } else state.heartTimer=.2;
   }
   root.BackroomsAudio={create,update};
