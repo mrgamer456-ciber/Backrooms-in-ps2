@@ -8,6 +8,7 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 - `audio.js`: gera WAVs pequenos no primeiro inicio e toca ambiente, passos, batimento, coleta, transicao de nivel e susto.
 - `assets.js`: gera os dois BMPs procedurais de parede, incluindo papel de parede do nivel 1 e tubos do Pipe Dreams.
 - `font.js`: porta a fonte bitmap 5x7 original, usada na tela inicial, HUD, VHS e tela de morte.
+- `world3d.js`: gera a malha OBJ do mapa e renderiza paredes, piso, teto, porta, armario e luminarias no renderer 3D VU1 do AthenaEnv.
 - `game.js`: logica do jogo — mapa, movimento, colisao, pulo, stamina, lanterna, armario, itens e IA das anomalias.
 - `input.js`: leitura do DualShock pelo modulo `Pads`, incluindo analogicos, direcional e botoes.
 - `raycast.js`: raycaster por coluna, profundidade, iluminacao da lanterna e projecao de sprites.
@@ -15,7 +16,7 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 
 ## Como testar no AthenaEnv
 
-1. Copie os oito arquivos JavaScript desta pasta para a pasta de scripts do AthenaEnv, mantendo todos juntos.
+1. Copie os nove arquivos JavaScript desta pasta para a pasta de scripts do AthenaEnv, mantendo todos juntos.
 2. Configure o AthenaEnv para iniciar `main.js` (esse e o nome padrao do runtime).
 3. Inicie o AthenaEnv no PS2. O jogo abre na tela inicial.
 4. Aperte START ou R2 para iniciar.
@@ -36,7 +37,7 @@ Nao e necessario compilar um ELF do jogo: o AthenaEnv executa os scripts JavaScr
 
 ## Estado real desta conversao
 
-**Ainda nao e a versao final nem foi validada no PS2.** A logica principal, leitura do DualShock e loop do AthenaEnv foram ligados. A primeira renderizacao 2.5D ja desenha o cenario, porta branca, armario, itens, anomalias, HUD VHS e a mao/lanterna com os mesmos pontos geometricos do desenho aprovado. O papel de parede e os canos agora sao gerados como BMPs 128x128 com o padrao portado do gerador C++ original. O audio procedural ja foi ligado usando WAVs gerados pelo proprio script no primeiro inicio; precisa de teste no console. O modelo 3D de Steve ainda precisa ser integrado.
+**Ainda nao e a versao final nem foi validada no PS2.** A logica principal, leitura do DualShock e loop do AthenaEnv foram ligados. O mundo agora e uma malha 3D real gerada do mapa e enviada ao renderer VU1: paredes texturizadas, piso, teto, porta, armario e luminarias. O raycaster continua apenas para colisao/projecao e o HUD VHS/itens/anomalias/mao ficam como camada 2D por cima. O papel de parede e os canos agora sao gerados como BMPs 128x128 com o padrao portado do gerador C++ original. O audio procedural ja foi ligado usando WAVs gerados pelo proprio script no primeiro inicio; precisa de teste no console. O modelo 3D de Steve ainda precisa ser integrado.
 
 O raycaster foi mantido porque e a tecnologia do jogo C++ atual; o renderer 3D de modelos do AthenaEnv pode ser integrado para personagens/objetos sem transformar o mapa inteiro em um jogo de malha 3D.
 
