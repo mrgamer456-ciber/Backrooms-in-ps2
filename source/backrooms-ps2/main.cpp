@@ -320,6 +320,77 @@ static void drawWorld(GSGLOBAL *gs)
         rect(gs, x * colW, (float)c.top, (x + 1) * colW, (float)c.bottom, rgb(r * b, gr * b, bl * b));
     }
 
+    // PORTA DE SAIDA: batente, folha aberta e luz forte do outro lado.
+    // A porta ocupa somente as colunas em que o raycasting encontrou a saida.
+    {
+        float dx = g.exitX - g.px, dy = g.exitY - g.py;
+        float invDet = 1.0f / (g.planeX * g.dirY - g.dirX * g.planeY);
+        float tx = invDet * (g.dirY * dx - g.dirX * dy);
+        float ty = invDet * (-g.planeY * dx + g.planeX * dy);
+        if (ty > 0.2f) {
+            float lh = (float)gs->Height / ty;
+            float cx = (float)(gs->Width / 2) * (1.0f + tx / ty);
+            float floorY = (float)gs->Height * 0.5f + lh * 0.5f;
+            float doorH = lh * 0.88f;
+            float doorW = lh * 0.62f;
+            float topY = floorY - doorH;
+            float left = cx - doorW * 0.5f;
+            float right = cx + doorW * 0.5f;
+            float glow = 0.78f + 0.22f * g.flicker;
+
+            int c0 = (int)(left / colW);
+            int c1 = (int)(right / colW);
+            if (c0 < 0) c0 = 0;
+            if (c1 >= bk::RAY_COLS) c1 = bk::RAY_COLS - 1;
+
+            for (int c = c0; c <= c1; c++) {
+                if (g.cols[c].type != 2) continue;
+                float x0 = c * colW;
+                float x1 = x0 + colW;
+                float xm = (x0 + x1) * 0.5f;
+
+                // claridade que vaza pela abertura
+                if (xm > left + doorW * 0.07f && xm < right - doorW * 0.07f) {
+                    rect(gs, x0, topY + doorH * 0.07f, x1, floorY,
+                         rgb(20 * glow, 105 * glow, 125 * glow));
+                    rect(gs, x0, topY + doorH * 0.12f, x1, floorY - doorH * 0.025f,
+                         rgb(115 * glow, 205 * glow, 220 * glow));
+                    if (xm > cx - doorW * 0.12f && xm < cx + doorW * 0.12f)
+                        rect(gs, x0, topY + doorH * 0.17f, x1, floorY - doorH * 0.04f,
+                             rgb(235 * glow, 250 * glow, 235 * glow));
+                }
+
+                // batente de madeira escura
+                if (xm < left + doorW * 0.10f || xm > right - doorW * 0.10f)
+                    rect(gs, x0, topY, x1, floorY, rgb(62, 38, 20));
+                // folha da porta aberta, recolhida para o lado direito
+                if (xm > right - doorW * 0.29f && xm < right - doorW * 0.10f) {
+                    rect(gs, x0, topY + doorH * 0.045f, x1, floorY - doorH * 0.015f,
+                         rgb(105, 65, 32));
+                    rect(gs, x0, topY + doorH * 0.08f, x1, floorY - doorH * 0.055f,
+                         rgb(145, 91, 43));
+                    rect(gs, x0, topY + doorH * 0.43f, x1, topY + doorH * 0.48f,
+                         rgb(75, 45, 22));
+                }
+                // travessa superior e soleira
+                if (xm >= left && xm <= right) {
+                    rect(gs, x0, topY, x1, topY + doorH * 0.075f, rgb(72, 45, 25));
+                    rect(gs, x0, floorY - doorH * 0.035f, x1, floorY, rgb(88, 58, 32));
+                }
+            }
+
+            // pequena maçaneta dourada na folha aberta
+            float knobX = right - doorW * 0.205f;
+            float knobY = topY + doorH * 0.54f;
+            if (knobX >= 0 && knobX < gs->Width) {
+                int kc = (int)(knobX / colW);
+                if (kc >= 0 && kc < bk::RAY_COLS && g.cols[kc].type == 2)
+                    rect(gs, knobX - 1.5f, knobY - 1.5f, knobX + 1.5f, knobY + 1.5f,
+                         rgb(255, 205, 70));
+            }
+        }
+    }
+
     // itens: agua de amendoa
     for (int i = 0; i < g.itemCount; i++) {
         if (!g.items[i].active) continue;
