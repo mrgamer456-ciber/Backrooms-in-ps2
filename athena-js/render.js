@@ -96,7 +96,8 @@
       const tx=inv*(g.dirY*dx-g.dirX*dy);
       const ty=inv*(-g.planeY*dx+g.planeX*dy);
       if(ty<.2)return null;
-      return {x:w*.5*(1+tx/ty),size:h/ty,depth:ty};
+      const horizon=Math.max(h*.12,Math.min(h*.90,h*(.5+g.pitch)+g.jumpHeight*h*.55));
+      return {x:w*.5*(1+tx/ty),size:h/ty,depth:ty,horizon};
     }
     function drawSprites(g,scene) {
       // Desenha primeiro os objetos distantes para manter a ordem de profundidade.
@@ -115,7 +116,7 @@
         if(s.p.depth>=scene.columns[centerCol].depth)continue;
         if(s.kind==="enemy"&&g.enemyHiddenTimer>0)continue;
         const size=Math.max(3,Math.min(h*1.2,s.p.size*.72));
-        const x=s.p.x-size*.5,y=h*.5-size*.5;
+        const x=s.p.x-size*.5,y=s.p.horizon-size*.5;
         if(s.kind==="item") {
           rect(x+size*.36,y+size*.35,size*.28,size*.42,color(170,190,130));
           rect(x+size*.30,y+size*.30,size*.40,size*.10,color(210,220,180));
@@ -176,7 +177,7 @@
       const col=Math.max(0,Math.min(scene.columns.length-1,(p.x/(w/scene.columns.length))|0));
       if(scene.columns[col].type!==2||p.depth>scene.columns[col].depth+0.8)return;
       const dh=Math.min(h*1.5,p.size*.92),dw=dh*.55;
-      const x=p.x-dw*.5,y=h*.5-dh*.50;
+      const x=p.x-dw*.5,y=p.horizon-dh*.50;
       rect(x-dw*.10,y-dh*.04,dw*1.20,dh*1.08,color(150,150,160));
       rect(x-dw*.06,y-dh*.02,dw*1.12,dh*1.04,color(55,34,20));
       rect(x,y,dw,dh,color(255,255,255));
@@ -191,7 +192,7 @@
       const col=Math.max(0,Math.min(scene.columns.length-1,(p.x/(w/scene.columns.length))|0));
       if(p.depth>=scene.columns[col].depth+0.6)return;
       const hh=Math.min(h*1.2,p.size*.78),ww=hh*.48;
-      const x=p.x-ww*.5,y=h*.5-hh*.5;
+      const x=p.x-ww*.5,y=p.horizon-hh*.5;
       rect(x-ww*.05,y-hh*.02,ww*1.10,hh*1.04,color(22,25,27));
       rect(x,y,ww,hh,color(82,91,94));
       rect(x+ww*.08,y+hh*.08,ww*.84,hh*.82,color(48,56,59));
