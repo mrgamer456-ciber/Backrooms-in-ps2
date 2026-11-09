@@ -1,3 +1,8 @@
+import "game.js";
+import "input.js";
+import "raycast.js";
+import "render.js";
+
 // Ponto de entrada AthenaEnv. Athena executa main.js automaticamente.
 (function(root) {
   "use strict";
@@ -35,4 +40,4 @@
   }
   root.startBackroomsAthena=startBackroomsAthena;
   startBackroomsAthena();
-})(this);
+})(globalThis);
