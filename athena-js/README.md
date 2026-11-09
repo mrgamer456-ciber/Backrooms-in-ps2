@@ -4,15 +4,15 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 
 ## Arquivos
 
-- `main.js`: entrada automatica, imports e loop com `os.setInterval`.
+- `main.js`: entrada automatica, importa os modulos e inicia o loop com `os.setInterval`.
 - `audio.js`: gera WAVs pequenos no primeiro inicio e toca ambiente, passos, batimento, coleta, transicao de nivel e susto.
-- `assets.js`: gera os dois BMPs procedurais de parede, incluindo papel de parede do nivel 1 e tubos do Pipe Dreams.
+- `assets.js`: gera os dois BMPs procedurais de parede, incluindo papel de parede do nivel 0 e tubos do Pipe Dreams.
 - `font.js`: porta a fonte bitmap 5x7 original, usada na tela inicial, HUD, VHS e tela de morte.
 - `world3d.js`: gera a malha OBJ do mapa e renderiza paredes, piso, teto, porta, armario e luminarias no renderer 3D VU1 do AthenaEnv.
 - `game.js`: logica do jogo — mapa, movimento, colisao, pulo, stamina, lanterna, armario, itens e IA das anomalias.
 - `input.js`: leitura do DualShock pelo modulo `Pads`, incluindo analogicos, direcional e botoes.
-- `raycast.js`: raycaster por coluna, profundidade, iluminacao da lanterna e projecao de sprites.
-- `render.js`: camada 2D de sprites, HUD VHS, fonte bitmap e geometria aprovada da mao/lanterna sobre o mundo 3D.
+- `raycast.js`: raycaster por coluna, profundidade, iluminacao e projecao de sprites.
+- `render.js`: camada 2D de sprites, HUD VHS, fonte bitmap e a mao/lanterna em primeira pessoa.
 
 ## Como testar no AthenaEnv
 
@@ -25,9 +25,9 @@ Nao e necessario compilar um ELF do jogo: o AthenaEnv executa os scripts JavaScr
 
 ## Controles
 
-- Analógico esquerdo: andar.
-- Analógico direito horizontal: virar.
-- Analógico direito vertical: olhar para cima/baixo.
+- Analogico esquerdo: andar.
+- Analogico direito horizontal: virar.
+- Analogico direito vertical: olhar para cima/baixo.
 - Direcional: andar/virar.
 - R1: correr.
 - X: pular.
@@ -37,8 +37,8 @@ Nao e necessario compilar um ELF do jogo: o AthenaEnv executa os scripts JavaScr
 
 ## Estado real desta conversao
 
-**Ainda nao e a versao final nem foi validada no PS2.** A logica principal, leitura do DualShock e loop do AthenaEnv foram ligados. O mundo agora e uma malha 3D real gerada do mapa e enviada ao renderer VU1: paredes texturizadas, piso, teto, porta, armario e luminarias. O raycaster continua apenas para colisao/projecao e o HUD VHS/itens/anomalias/mao ficam como camada 2D por cima. O papel de parede e os canos agora sao gerados como BMPs 128x128 com o padrao portado do gerador C++ original. O audio procedural ja foi ligado usando WAVs gerados pelo proprio script no primeiro inicio; precisa de teste no console. O modelo 3D de Steve ainda precisa ser integrado.
+**Ainda nao e a versao final nem foi validada no PS2.** O loop de entrada, atualizacao e desenho esta conectado. O cenario e uma malha 3D gerada a partir do mapa e enviada ao renderer VU1: paredes texturizadas, piso, teto, porta, armario e luminarias. O raycaster continua sendo usado para profundidade e projecao dos sprites; HUD VHS, itens, anomalias e a mao/lanterna ficam como camada 2D por cima.
 
-O mapa continua usando a logica de colisao original, mas a exibicao do cenario foi migrada para malha 3D. O modelo rigged do Steve e a animacao pronta de pulo ainda dependem dos arquivos de modelo/animacao escolhidos; a pasta `models/README.md` registra a fonte e os formatos necessarios.
+O personagem continua no formato em primeira pessoa ja existente no projeto: camera do jogador e mao/lanterna desenhada. Nao trocar por Steve ou Alex. A logica, a porta e a geometria precisam de validacao visual no AthenaEnv/PS2. O audio procedural tambem precisa de teste no console.
 
 O codigo original em `source/backrooms-ps2/` nao foi alterado por esta conversao.
