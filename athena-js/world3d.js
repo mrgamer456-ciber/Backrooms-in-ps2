@@ -17,8 +17,8 @@
     return [
       "newmtl wallpaper","Ka 0.45 0.42 0.30","Kd 1 1 1","Ks 0 0 0","illum 1","map_Kd bk_wallpaper.bmp","",
       "newmtl pipewall","Ka 0.30 0.30 0.30","Kd 1 1 1","Ks 0 0 0","illum 1","map_Kd bk_pipedreams.bmp","",
-      "newmtl floor","Ka 0.30 0.24 0.14","Kd 0.58 0.46 0.28","Ks 0 0 0","illum 1","",
-      "newmtl ceiling","Ka 0.55 0.52 0.38","Kd 0.82 0.79 0.63","Ks 0 0 0","illum 1","",
+      "newmtl floor",level===2?"Ka 0.08 0.08 0.07":"Ka 0.30 0.24 0.14",level===2?"Kd 0.17 0.16 0.14":"Kd 0.58 0.46 0.28","Ks 0 0 0","illum 1","",
+      "newmtl ceiling",level===2?"Ka 0.12 0.12 0.11":"Ka 0.55 0.52 0.38",level===2?"Kd 0.25 0.24 0.22":"Kd 0.82 0.79 0.63","Ks 0 0 0","illum 1","",
       "newmtl locker","Ka 0.12 0.14 0.15","Kd 0.35 0.40 0.42","Ks 0.15 0.15 0.15","Ns 18","illum 2","",
       "newmtl lockerpanel","Ka 0.08 0.09 0.10","Kd 0.17 0.20 0.22","Ks 0.1 0.1 0.1","Ns 12","illum 2","",
       "newmtl doorframe","Ka 0.12 0.07 0.04","Kd 0.24 0.13 0.07","Ks 0.05 0.05 0.05","illum 2","",
