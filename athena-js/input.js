@@ -43,4 +43,4 @@
   root.BackroomsInput={fromAxes,readPad,resetEdges(){
     edgeState.l1=false;edgeState.x=false;edgeState.square=false;
   }};
-})(this);
+})(globalThis);
