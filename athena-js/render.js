@@ -195,4 +195,4 @@
     };
   }
   root.BackroomsRenderer={createRenderer};
-})(this);
+})(globalThis);
