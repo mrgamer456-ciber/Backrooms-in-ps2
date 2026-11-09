@@ -302,12 +302,12 @@
         rect(0,0,danger,h,color(120,0,0));
         rect(w-danger,0,danger,h,color(120,0,0));
       }
-      rect(18,h-28,w*.22,8,color(25,25,20));
-      rect(20,h-26,w*.18*Math.max(0,g.stamina),4,color(g.stamina<.25?210:190,g.stamina<.25?45:180,100));
+      rect(20,h-30,124,10,color(20,20,20));
+      rect(22,h-28,120*Math.max(0,g.stamina),6,g.exhausted?color(200,40,40):color(210,210,210));
       text(20,16,"NIVEL "+g.level,color(240,240,220),2);
       if(g.calmTimer>0) {
-        rect(18,h-45,w*.22,7,color(20,20,20));
-        rect(20,h-43,w*.18*(g.calmTimer/5),3,color(60,140,255));
+        rect(20,h-44,124,8,color(20,20,20));
+        rect(22,h-42,120*(g.calmTimer/5),4,color(60,140,255));
       }
       if(g.msgTimer>0) {
         const msg=g.msgId===1?"ENCONTRE A PORTA ABERTA COM A LUZ BRANCA":g.msgId===2?"AGUA DE AMENDOA!":g.msgId===3?"NIVEL 2: PIPE DREAMS":"";
