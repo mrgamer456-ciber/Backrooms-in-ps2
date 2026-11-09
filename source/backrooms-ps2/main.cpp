@@ -320,74 +320,109 @@ static void drawWorld(GSGLOBAL *gs)
         rect(gs, x * colW, (float)c.top, (x + 1) * colW, (float)c.bottom, rgb(r * b, gr * b, bl * b));
     }
 
-    // PORTA DE SAIDA: batente, folha aberta e luz forte do outro lado.
-    // A porta ocupa somente as colunas em que o raycasting encontrou a saida.
+    // PORTA DE SAIDA: modelo 3D procedural, projetado a partir do mundo.
     {
-        float dx = g.exitX - g.px, dy = g.exitY - g.py;
-        float invDet = 1.0f / (g.planeX * g.dirY - g.dirX * g.planeY);
-        float tx = invDet * (g.dirY * dx - g.dirX * dy);
-        float ty = invDet * (-g.planeY * dx + g.planeX * dy);
-        if (ty > 0.2f) {
-            float lh = (float)gs->Height / ty;
-            float cx = (float)(gs->Width / 2) * (1.0f + tx / ty);
-            float floorY = (float)gs->Height * 0.5f + lh * 0.5f;
-            float doorH = lh * 0.88f;
-            float doorW = lh * 0.62f;
-            float topY = floorY - doorH;
-            float left = cx - doorW * 0.5f;
-            float right = cx + doorW * 0.5f;
-            float glow = 0.78f + 0.22f * g.flicker;
+        struct DoorVertex { float x, y, z; };
+        const float det = g.planeX * g.dirY - g.dirX * g.planeY;
+        const float invDet = fabsf(det) > 0.0001f ? 1.0f / det : 0.0f;
+        const float W = (float)gs->Width, H = (float)gs->Height;
+        const float glow = 0.82f + 0.18f * g.flicker;
+        const int ex = (int)g.exitX, ey = (int)g.exitY;
 
-            int c0 = (int)(left / colW);
-            int c1 = (int)(right / colW);
-            if (c0 < 0) c0 = 0;
-            if (c1 >= bk::RAY_COLS) c1 = bk::RAY_COLS - 1;
+        // A porta fica virada para o corredor livre junto ao bloco de parede.
+        float tx = 1.0f, ty = 0.0f, nx = 0.0f, ny = 1.0f;
+        if (g.map[ey][ex + 1] == 0) { tx=0; ty=1; nx=1; ny=0; }
+        else if (g.map[ey][ex - 1] == 0) { tx=0; ty=1; nx=-1; ny=0; }
+        else if (g.map[ey + 1][ex] == 0) { tx=1; ty=0; nx=0; ny=1; }
+        else if (g.map[ey - 1][ex] == 0) { tx=1; ty=0; nx=0; ny=-1; }
 
-            for (int c = c0; c <= c1; c++) {
-                if (g.cols[c].type != 2) continue;
-                float x0 = c * colW;
-                float x1 = x0 + colW;
-                float xm = (x0 + x1) * 0.5f;
+        auto point = [&](float along, float normal, float z) -> DoorVertex {
+            DoorVertex v = { g.exitX + tx*along + nx*normal,
+                             g.exitY + ty*along + ny*normal, z };
+            return v;
+        };
+        auto project = [&](const DoorVertex &v, float &sx, float &sy) -> bool {
+            float rx=v.x-g.px, ry=v.y-g.py;
+            float cameraX=invDet*(g.dirY*rx-g.dirX*ry);
+            float depth=invDet*(-g.planeY*rx+g.planeX*ry);
+            if (depth <= 0.18f) return false;
+            sx=W*0.5f*(1.0f+cameraX/depth);
+            sy=H*0.5f+(0.5f-v.z)*H/depth;
+            return true;
+        };
+        auto face = [&](const DoorVertex &a, const DoorVertex &b,
+                        const DoorVertex &c, const DoorVertex &d, u64 color) {
+            float x1,y1,x2,y2,x3,y3,x4,y4;
+            if (!project(a,x1,y1) || !project(b,x2,y2) ||
+                !project(c,x3,y3) || !project(d,x4,y4)) return;
+            if (x1 < -W || x1 > W*2 || x2 < -W || x2 > W*2 ||
+                x3 < -W || x3 > W*2 || x4 < -W || x4 > W*2) return;
+            gsKit_prim_quad_3d(gs,x1,y1,1,x2,y2,1,x3,y3,1,x4,y4,1,color);
+        };
 
-                // claridade que vaza pela abertura
-                if (xm > left + doorW * 0.07f && xm < right - doorW * 0.07f) {
-                    rect(gs, x0, topY + doorH * 0.07f, x1, floorY,
-                         rgb(20 * glow, 105 * glow, 125 * glow));
-                    rect(gs, x0, topY + doorH * 0.12f, x1, floorY - doorH * 0.025f,
-                         rgb(115 * glow, 205 * glow, 220 * glow));
-                    if (xm > cx - doorW * 0.12f && xm < cx + doorW * 0.12f)
-                        rect(gs, x0, topY + doorH * 0.17f, x1, floorY - doorH * 0.04f,
-                             rgb(235 * glow, 250 * glow, 235 * glow));
-                }
+        DoorVertex center=point(0.0f,0.0f,0.5f);
+        float centerX=0, centerY=0;
+        bool visible=project(center,centerX,centerY);
+        int centerCol=(int)(centerX/(W/(float)bk::RAY_COLS));
+        if (centerCol<0 || centerCol>=bk::RAY_COLS ||
+            g.cols[centerCol].type!=2) visible=false;
 
-                // batente de madeira escura
-                if (xm < left + doorW * 0.10f || xm > right - doorW * 0.10f)
-                    rect(gs, x0, topY, x1, floorY, rgb(62, 38, 20));
-                // folha da porta aberta, recolhida para o lado direito
-                if (xm > right - doorW * 0.29f && xm < right - doorW * 0.10f) {
-                    rect(gs, x0, topY + doorH * 0.045f, x1, floorY - doorH * 0.015f,
-                         rgb(105, 65, 32));
-                    rect(gs, x0, topY + doorH * 0.08f, x1, floorY - doorH * 0.055f,
-                         rgb(145, 91, 43));
-                    rect(gs, x0, topY + doorH * 0.43f, x1, topY + doorH * 0.48f,
-                         rgb(75, 45, 22));
-                }
-                // travessa superior e soleira
-                if (xm >= left && xm <= right) {
-                    rect(gs, x0, topY, x1, topY + doorH * 0.075f, rgb(72, 45, 25));
-                    rect(gs, x0, floorY - doorH * 0.035f, x1, floorY, rgb(88, 58, 32));
-                }
+        if (visible) {
+            // Luz e passagem ao fundo, recuadas em relacao ao batente.
+            face(point(-0.35f,0.012f,0.02f),point(0.35f,0.012f,0.02f),
+                 point(0.35f,0.012f,0.94f),point(-0.35f,0.012f,0.94f),
+                 rgb(15*glow,95*glow,115*glow));
+            face(point(-0.29f,0.018f,0.05f),point(0.29f,0.018f,0.05f),
+                 point(0.29f,0.018f,0.90f),point(-0.29f,0.018f,0.90f),
+                 rgb(125*glow,215*glow,225*glow));
+            face(point(-0.15f,0.024f,0.08f),point(0.15f,0.024f,0.08f),
+                 point(0.15f,0.024f,0.86f),point(-0.15f,0.024f,0.86f),
+                 rgb(235*glow,250*glow,240*glow));
+
+            // Batente: dois montantes, travessa superior e faces de profundidade.
+            face(point(-0.43f,0.075f,0),point(-0.33f,0.075f,0),
+                 point(-0.33f,0.075f,1),point(-0.43f,0.075f,1),rgb(48,29,17));
+            face(point(0.33f,0.075f,0),point(0.43f,0.075f,0),
+                 point(0.43f,0.075f,1),point(0.33f,0.075f,1),rgb(48,29,17));
+            face(point(-0.43f,0.075f,0.91f),point(0.43f,0.075f,0.91f),
+                 point(0.43f,0.075f,1),point(-0.43f,0.075f,1),rgb(75,47,26));
+            face(point(-0.43f,0,0),point(-0.43f,0.075f,0),
+                 point(-0.43f,0.075f,1),point(-0.43f,0,1),rgb(29,18,12));
+            face(point(0.43f,0,0),point(0.43f,0.075f,0),
+                 point(0.43f,0.075f,1),point(0.43f,0,1),rgb(29,18,12));
+
+            // Folha articulada: a dobradica fica no lado esquerdo e a porta abre para o corredor.
+            const float hinge=-0.33f, leafW=0.66f, ca=0.53f, sa=0.85f;
+            auto leaf = [&](float u,float z,float offset) -> DoorVertex {
+                return point(hinge+u*ca,0.085f+u*sa+offset,z);
+            };
+            face(leaf(0,0.035f,0),leaf(leafW,0.035f,0),
+                 leaf(leafW,0.91f,0),leaf(0,0.91f,0),rgb(91,52,27));
+
+            // Molduras e paineis em relevo na superficie da folha.
+            face(leaf(0.04f,0.08f,0.006f),leaf(leafW-0.04f,0.08f,0.006f),
+                 leaf(leafW-0.04f,0.43f,0.006f),leaf(0.04f,0.43f,0.006f),rgb(139,87,44));
+            face(leaf(0.04f,0.53f,0.006f),leaf(leafW-0.04f,0.53f,0.006f),
+                 leaf(leafW-0.04f,0.86f,0.006f),leaf(0.04f,0.86f,0.006f),rgb(139,87,44));
+            face(leaf(0.075f,0.12f,0.010f),leaf(leafW-0.075f,0.12f,0.010f),
+                 leaf(leafW-0.075f,0.39f,0.010f),leaf(0.075f,0.39f,0.010f),rgb(76,43,24));
+            face(leaf(0.075f,0.57f,0.010f),leaf(leafW-0.075f,0.57f,0.010f),
+                 leaf(leafW-0.075f,0.82f,0.010f),leaf(0.075f,0.82f,0.010f),rgb(76,43,24));
+
+            // Veios finos de madeira: textura procedural desenhada sobre a propria folha.
+            for (int grain=0; grain<5; grain++) {
+                float u=0.12f+grain*0.105f;
+                face(leaf(u,0.15f,0.014f),leaf(u+0.012f,0.15f,0.014f),
+                     leaf(u+0.012f,0.80f,0.014f),leaf(u,0.80f,0.014f),
+                     rgb(158+grain*2,101+grain*2,51));
             }
-
-            // pequena maçaneta dourada na folha aberta
-            float knobX = right - doorW * 0.205f;
-            float knobY = topY + doorH * 0.54f;
-            if (knobX >= 0 && knobX < gs->Width) {
-                int kc = (int)(knobX / colW);
-                if (kc >= 0 && kc < bk::RAY_COLS && g.cols[kc].type == 2)
-                    rect(gs, knobX - 1.5f, knobY - 1.5f, knobX + 1.5f, knobY + 1.5f,
-                         rgb(255, 205, 70));
-            }
+            // Espessura da borda, dobradica, macaneta e soleira.
+            face(leaf(leafW-0.025f,0.04f,0.018f),leaf(leafW,0.04f,0.018f),
+                 leaf(leafW,0.90f,0.018f),leaf(leafW-0.025f,0.90f,0.018f),rgb(39,23,14));
+            face(leaf(0.10f,0.43f,0.020f),leaf(0.18f,0.43f,0.020f),
+                 leaf(0.18f,0.49f,0.020f),leaf(0.10f,0.49f,0.020f),rgb(240,184,55));
+            face(point(-0.43f,0.02f,0),point(0.43f,0.02f,0),
+                 point(0.43f,0.13f,0.025f),point(-0.43f,0.13f,0.025f),rgb(84,54,30));
         }
     }
 
