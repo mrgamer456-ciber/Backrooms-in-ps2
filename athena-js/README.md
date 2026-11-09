@@ -10,7 +10,7 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 - `font.js`: porta a fonte bitmap 5x7 original, usada na tela inicial, HUD, VHS e tela de morte.
 - `world3d.js`: gera a malha OBJ do mapa e renderiza paredes, piso, teto, porta, armario e luminarias no renderer 3D VU1 do AthenaEnv.
 - `game.js`: logica do jogo — mapa, movimento, colisao, pulo, stamina, lanterna, armario, itens e IA das anomalias.
-- `input.js`: leitura do DualShock pelo modulo `Pads`, incluindo analogicos, direcional e botoes.
+- `input.js`: leitura do DualShock pelo modulo `Pads`; usa a faixa analogica nativa do AthenaEnv (-127 a 128), direcional e botoes.
 - `raycast.js`: raycaster por coluna, profundidade, iluminacao e projecao de sprites.
 - `render.js`: camada 2D de sprites, HUD VHS, fonte bitmap e a mao/lanterna em primeira pessoa.
 
@@ -37,7 +37,7 @@ Nao e necessario compilar um ELF do jogo: o AthenaEnv executa os scripts JavaScr
 
 ## Estado real desta conversao
 
-**Ainda nao e a versao final nem foi validada no AthenaEnv/PS2.** O repositorio tem verificacoes automatizadas de sintaxe, logica, normalizacao dos analogicos e geracao da malha 3D usando mocks; esses testes nao substituem a execucao real no console. O loop de entrada, atualizacao e desenho esta conectado. O cenario e uma malha 3D gerada a partir do mapa e enviada ao renderer VU1: paredes texturizadas, piso, teto, porta, armario e luminarias. O raycaster continua sendo usado para profundidade e projecao dos sprites; HUD VHS, itens, anomalias e a mao/lanterna ficam como camada 2D por cima.
+**Ainda nao e a versao final nem foi validada no AthenaEnv/PS2.** O repositorio tem verificacoes automatizadas de sintaxe, imports do `main.js`, logica, escala dos analogicos e geracao das malhas dos niveis 0 e Pipe Dreams usando mocks. A inicializacao 3D segue os exemplos oficiais do AthenaEnv (framebuffer CT32, `Lights.new`, `Render.begin`, `Batch` e `Camera`); esses testes nao substituem a execucao real no console. O loop de entrada, atualizacao e desenho esta conectado. O cenario e uma malha 3D gerada a partir do mapa e enviada ao renderer VU1: paredes texturizadas, piso, teto, porta, armario e luminarias. O raycaster continua sendo usado para profundidade e projecao dos sprites; HUD VHS, itens, anomalias e a mao/lanterna ficam como camada 2D por cima.
 
 O personagem continua no formato em primeira pessoa ja existente no projeto: camera do jogador e mao/lanterna desenhada. Nao trocar por Steve ou Alex. A logica, a porta e a geometria precisam de validacao visual no AthenaEnv/PS2. O audio procedural tambem precisa de teste no console.
 
