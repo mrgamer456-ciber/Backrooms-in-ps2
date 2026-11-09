@@ -1,5 +1,5 @@
 // Entrada real do DualShock no AthenaEnv.
-// Eixos analogicos Athena (-4096..4096) sao convertidos para -128..128.
+// AthenaEnv ja entrega os analogicos na faixa nativa -127..128.
 (function(root) {
   "use strict";
   const edgeState={l1:false,x:false,square:false};
@@ -27,14 +27,14 @@
     if(typeof Pads==="undefined"||!pad)return fromAxes({});
     pad.update();
     const down=(button)=>pad.pressed(button);
-    let moveY=-(pad.ly/32),turn=pad.rx/32;
+    let moveY=-pad.ly,turn=pad.rx;
     if(down(Pads.UP))moveY+=128;
     if(down(Pads.DOWN))moveY-=128;
     if(down(Pads.LEFT))turn-=128;
     if(down(Pads.RIGHT))turn+=128;
     return fromAxes({
-      moveX:pad.lx/32,moveY:clamp(moveY),turn:clamp(turn),
-      lookY:-(pad.ry/32),r1:down(Pads.R1),
+      moveX:pad.lx,moveY:clamp(moveY),turn:clamp(turn),
+      lookY:-pad.ry,r1:down(Pads.R1),
       l1:down(Pads.L1),x:down(Pads.CROSS),
       square:down(Pads.SQUARE),
       start:down(Pads.START),r2:down(Pads.R2)
