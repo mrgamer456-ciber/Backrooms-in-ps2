@@ -251,12 +251,13 @@
       draw(game) {
         if(!initialized)throw new Error("Renderer ainda nao inicializado.");
         frame++;Screen.clear(color(0,0,0));
-        if(game.onTitle){drawTitle();return;}
-        if(game.dead){drawDead(game);return;}
+        if(game.onTitle){drawTitle();Screen.flip();return;}
+        if(game.dead){drawDead(game);Screen.flip();return;}
         const scene=root.BackroomsRaycast.cast(game,w,h,128);
         drawBackground(game,scene);drawWalls(game,scene);
         drawDoor(game,scene);drawCabinet(game,scene);drawSprites(game,scene);
         drawHand(game);drawHud(game);drawVhs(game);
+        Screen.flip();
       }
     };
   }
