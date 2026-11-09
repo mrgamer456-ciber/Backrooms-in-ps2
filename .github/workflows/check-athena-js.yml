@@ -1,0 +1,38 @@
+name: Check Athena JavaScript
+
+on:
+  push:
+    paths:
+      - "athena-js/**"
+      - "tests/athena-js-smoke.mjs"
+      - ".github/workflows/check-athena-js.yml"
+  pull_request:
+    paths:
+      - "athena-js/**"
+      - "tests/athena-js-smoke.mjs"
+      - ".github/workflows/check-athena-js.yml"
+  workflow_dispatch:
+
+jobs:
+  syntax-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -e
+          for file in athena-js/*.js; do
+            if [ "$file" = "athena-js/main.js" ]; then
+              node --input-type=module --check < "$file"
+            else
+              node --check "$file"
+            fi
+          done
+      - name: Run game logic smoke tests
+        run: node tests/athena-js-smoke.mjs
