@@ -18,7 +18,7 @@ BackroomsGame.newGame(game, 0x12345678);
 game.onTitle = false;
 
 assert.equal(game.mapRevision, 1, "novo jogo deve gerar a primeira revisao do mapa");
-assert.equal(game.map[game.py * 40 + game.px | 0], 0, "posicao inicial deve estar em piso livre");
+assert.equal(game.map[(game.py | 0) * 40 + (game.px | 0)], 0, "posicao inicial deve estar em piso livre");
 assert.equal(game.map[(game.exitY | 0) * 40 + (game.exitX | 0)], 2, "saida deve ser marcada como porta");
 
 const scene = BackroomsRaycast.cast(game, 640, 448, 160);
