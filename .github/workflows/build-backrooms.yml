@@ -2,20 +2,23 @@ name: 2 - Compilar Backrooms PS2 ELF
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'source/backrooms-ps2/**'
-      - '.github/workflows/build-backrooms.yml'
+  workflow_run:
+    workflows: ["1 - Extrair Backrooms PS2"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Baixar codigo extraido
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Verificar fontes
         run: |
