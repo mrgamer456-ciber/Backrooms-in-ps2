@@ -59,7 +59,6 @@ static void initPad()
     // FINDCTP1 ainda e uma etapa de deteccao; mudar o modo nesse ponto pode falhar.
     for (int i = 0; i < 300; ++i) {
         if (padGetState(0, 0) == PAD_STATE_STABLE) break;
-        DelayThread(1000);
     }
 
     if (padGetState(0, 0) != PAD_STATE_STABLE) return;
@@ -71,7 +70,6 @@ static void initPad()
             padInfoMode(0, 0, PAD_MODECURID, 0) == PAD_TYPE_DUALSHOCK) {
             return;
         }
-        DelayThread(1000);
     }
 }
 
