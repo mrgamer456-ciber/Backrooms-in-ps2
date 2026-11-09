@@ -111,7 +111,7 @@
     return out.join("\n");
   }
   function create() {
-    let ready=false,revision=-1,batch=null,rootNode=null,data=null,obj=null,light=null;
+    let ready=false,revision=-1,rootNode=null,data=null,obj=null;
     function init() {
       const canvas=Screen.getMode();
       canvas.zbuffering=true;
@@ -120,8 +120,8 @@
       Screen.setMode(canvas);
       Render.init();
       Render.setView(67,.1,90,canvas.width,canvas.height);
-      light=0; // AthenaEnv usa IDs fixos de luz (0 a 3), nao possui Lights.new().
-      batch=new Batch({autoSort:true});
+      // Inicializacao sem luzes dinamicas: alguns builds do AthenaEnv podem falhar
+      // ao entrar no caminho nativo de iluminacao VU1.
       rootNode=new SceneNode();
       ready=true;
     }
@@ -129,32 +129,28 @@
       if(!ready)init();
       writeText("world.mtl",makeMtl(game.level));
       writeText("world.obj",buildObj(game));
-      // Cria um lote novo ao trocar de fase; evita depender de Batch.clear().
-      batch=new Batch({autoSort:true});
       data=new RenderData("world.obj");
-      data.pipeline=Render.PL_DEFAULT;
+      // Primeiro teste de compatibilidade: pipeline sem iluminacao nativa.
+      data.pipeline=Render.PL_NO_LIGHTS;
       data.face_culling=Render.CULL_FACE_NONE;
       data.accurate_clipping=true;
       obj=new RenderObject(data);
       obj.position={x:0,y:0,z:0};obj.rotation={x:0,y:0,z:0};obj.scale={x:1,y:1,z:1};
       rootNode=new SceneNode();rootNode.attach(obj);rootNode.update();
-      batch.add(obj);
       revision=game.mapRevision;
     }
     function render(game) {
-      if(!ready||!batch)return;
+      if(!ready||!obj)return;
       Render.begin();
       Screen.setParam(Screen.DEPTH_TEST_ENABLE,true);
       const eyeY=1.55+game.jumpHeight;
       Camera.position(game.px,eyeY,game.py);
       Camera.target(game.px+game.dirX,eyeY+game.pitch*2.0,game.py+game.dirY);
       Camera.update();
-      Lights.set(light,Lights.AMBIENT,game.level===2 ? 0.16 : 0.24,game.level===2 ? 0.12 : 0.22,game.level===2 ? 0.12 : 0.18);
-      Lights.set(light,Lights.DIRECTION,-game.dirX,-.35,-game.dirY);
-      const diffuse=game.flashlight ? 0.92 : 0.28;
-      Lights.set(light,Lights.DIFFUSE,diffuse,diffuse*.94,diffuse*.82);
       rootNode.update();
-      batch.render();
+      // RenderObject.render() evita o caminho interno de Batch.render() que pode
+      // acionar draw_wwi_with_lights em algumas versoes do AthenaEnv.
+      obj.render();
       Screen.setParam(Screen.DEPTH_TEST_ENABLE,false);
     }
     return {init,rebuild,render,get ready(){return ready;},get revision(){return revision;}};
