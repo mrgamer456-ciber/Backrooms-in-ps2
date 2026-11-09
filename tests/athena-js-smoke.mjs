@@ -4,6 +4,17 @@ import vm from "node:vm";
 
 const load = (path) => vm.runInThisContext(fs.readFileSync(path, "utf8"), { filename: path });
 
+
+const mainSource = fs.readFileSync("athena-js/main.js", "utf8");
+const importedModules = [...mainSource.matchAll(/import\\s+["']([^"']+)["'];/g)].map((match) => match[1]);
+assert.deepEqual(importedModules, [
+  "game.js", "input.js", "raycast.js", "font.js",
+  "render.js", "audio.js", "assets.js", "world3d.js"
+], "main.js deve importar todos os modulos na ordem correta");
+for (const modulePath of importedModules) {
+  assert.ok(fs.existsSync("athena-js/" + modulePath), "modulo importado deve existir: " + modulePath);
+}
+
 load("athena-js/game.js");
 load("athena-js/input.js");
 load("athena-js/raycast.js");
