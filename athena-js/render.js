@@ -358,7 +358,7 @@
         frame++;Screen.clear(color(0,0,0));
         if(game.onTitle){drawTitle();Screen.flip();return;}
         if(game.dead){drawDead(game);Screen.flip();return;}
-        const scene=root.BackroomsRaycast.cast(game,w,h,128);
+        const scene=root.BackroomsRaycast.cast(game,w,h,160);
         drawBackground(game,scene);drawWalls(game,scene);
         drawDoor(game,scene);drawCabinet(game,scene);drawSprites(game,scene);
         drawHand(game);drawHud(game);drawVhs(game);
