@@ -76,6 +76,7 @@ static void generate(Game& g) {
     memset(g.map, 1, sizeof(g.map));
     g.cabinetCount = 0;
     g.hiding = false;
+    g.enemyHiddenTimer = 0.0f;
     g.hiddenCabinet = -1;
     int prevCx = 0, prevCy = 0;
     const bool pipeDreams = (g.level == 2);
@@ -83,22 +84,19 @@ static void generate(Game& g) {
     // Pipe Dreams: corredor principal comprido, com alcovas laterais de manutencao.
     // O percurso segue em linha reta ate a porta no extremo oposto.
     if (pipeDreams) {
-        carveRect(g, 2, 19, 37, 21);
-        carveRect(g, 7, 15, 10, 19);
-        carveRect(g, 14, 21, 17, 25);
-        carveRect(g, 22, 15, 25, 19);
-        carveRect(g, 30, 21, 33, 25);
+        // Corredor longo e estreito: apenas uma celula de largura.
+        carveRect(g, 1, 20, 38, 20);
+        // Reentrancia lateral para o unico armario.
+        carveRect(g, 7, 18, 8, 20);
+        g.map[19][8] = 3; // bloco especial: armario visivel e solido
         g.px = 3.5f;
         g.py = 20.5f;
         g.angle = 0.0f;
-        g.cabinets[0] = {8.5f, 18.2f, true};
-        g.cabinets[1] = {15.5f, 22.0f, true};
-        g.cabinets[2] = {23.5f, 18.2f, true};
-        g.cabinets[3] = {31.5f, 22.0f, true};
-        g.cabinetCount = 4;
-        g.exitX = 37.5f;
+        g.cabinets[0] = {8.5f, 19.5f, true};
+        g.cabinetCount = 1;
+        g.exitX = 38.5f;
         g.exitY = 20.5f;
-        g.map[20][37] = 2;
+        g.map[20][38] = 2;
     } else {
     const int roomCount = 22;
     for (int i = 0; i < roomCount; i++) {
@@ -167,7 +165,7 @@ static void generate(Game& g) {
     }
 
     // anomalias, longe do jogador
-    g.anCount = (g.level == 2) ? 2 : 1 + (g.level - 1) / 2;
+    g.anCount = (g.level == 2) ? 1 : 1 + (g.level - 1) / 2;
     if (g.anCount > MAX_ANOMALIES) g.anCount = MAX_ANOMALIES;
     for (int i = 0; i < g.anCount; i++) {
         int px = 0, py = 0;
@@ -178,8 +176,13 @@ static void generate(Game& g) {
             float dx = x + 0.5f - g.px, dy = y + 0.5f - g.py;
             if (dx * dx + dy * dy > 14.0f * 14.0f) break;
         }
-        g.an[i].x = px + 0.5f;
-        g.an[i].y = py + 0.5f;
+        if (pipeDreams) {
+            g.an[i].x = 29.5f;
+            g.an[i].y = 20.5f;
+        } else {
+            g.an[i].x = px + 0.5f;
+            g.an[i].y = py + 0.5f;
+        }
         g.an[i].type = (i == 0 && g.level == 1) ? (uint8_t)SMILER : (uint8_t)(rnd(g) % 3);
         g.an[i].timer = 0;
         g.an[i].running = false;
@@ -228,6 +231,7 @@ void newGame(Game& g, uint32_t seed) {
     g.exhausted = false;
     g.flashlight = false;
     g.hiding = false;
+    g.enemyHiddenTimer = 0.0f;
     g.hiddenCabinet = -1;
     g.jumpHeight = 0.0f;
     g.jumpVelocity = 0.0f;
@@ -291,6 +295,7 @@ void update(Game& g, const Input& in, float dt) {
                 if (dx*dx + dy*dy < 2.0f*2.0f) {
                     g.hiding = true;
                     g.hiddenCabinet = i;
+                    g.enemyHiddenTimer = 10.0f;
                     g.jumpHeight = 0.0f;
                     g.jumpVelocity = 0.0f;
                     break;
@@ -298,9 +303,10 @@ void update(Game& g, const Input& in, float dt) {
             }
         }
     }
+    if (g.enemyHiddenTimer > 0.0f) { g.enemyHiddenTimer -= dt; if (g.enemyHiddenTimer < 0.0f) g.enemyHiddenTimer = 0.0f; }
     if (g.hiding) {
         if (g.msgTimer > 0) g.msgTimer -= dt;
-        return; // anomalias nao alcancam o jogador enquanto ele esta escondido
+        return; // jogador permanece protegido dentro do armario
     }
 
     g.angle += in.turn * TURN_SPEED * dt;
@@ -365,7 +371,7 @@ void update(Game& g, const Input& in, float dt) {
     const int ddx[4] = {1, -1, 0, 0};
     const int ddy[4] = {0, 0, 1, -1};
     g.nearest = 99.0f;
-    for (int i = 0; i < g.anCount; i++) {
+    for (int i = 0; i < g.anCount && g.enemyHiddenTimer <= 0.0f; i++) {
         Anomaly& a = g.an[i];
         float dx = g.px - a.x, dy = g.py - a.y;
         float d = sqrtf(dx * dx + dy * dy);
