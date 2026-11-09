@@ -170,7 +170,7 @@
           if(Math.abs(xm-cx)<headHalf)rect(x0,topY,colW,headH,headCol);
         }
         if(p.depth<scene.columns[cm].depth) {
-          const eyeSize=headH*(s.type===1?.34:.20),eyeY=topY+headH*.30;
+          const eyeSize=headH*(s.type===1 ? 0.34 : 0.20),eyeY=topY+headH*.30;
           rect(cx-headHalf*.55,eyeY,eyeSize,eyeSize,eyeCol);
           rect(cx+headHalf*.55-eyeSize,eyeY,eyeSize,eyeSize,eyeCol);
           if(s.type!==1)rect(cx-headHalf*.7,topY+headH*.68,headHalf*1.4,headH*.10,color(0,0,0));
