@@ -277,7 +277,7 @@ void update(Game& g, const Input& in, float dt) {
     if (in.toggleFlashlight) g.flashlight = !g.flashlight;
 
     // Pulo com gravidade: X dispara uma vez por pressionamento.
-    if (in.jump && g.jumpHeight <= 0.001f && !g.hiding) g.jumpVelocity = 3.25f;
+    if (in.jump && g.jumpHeight <= 0.001f && !g.hiding) g.jumpVelocity = 4.5f;
     if (g.jumpVelocity != 0.0f || g.jumpHeight > 0.0f) {
         g.jumpHeight += g.jumpVelocity * dt;
         g.jumpVelocity -= 8.5f * dt;
@@ -467,7 +467,7 @@ void castRays(Game& g, int screenH) {
         if (perp < 0.05f) perp = 0.05f;
 
         float fullH = (float)screenH / perp;
-        float horizon = (float)screenH * (0.5f + g.pitch) + g.jumpHeight * (float)screenH * 0.35f;
+        float horizon = (float)screenH * (0.5f + g.pitch) + g.jumpHeight * (float)screenH * 0.65f;
         if (horizon < (float)screenH * 0.12f) horizon = (float)screenH * 0.12f;
         if (horizon > (float)screenH * 0.90f) horizon = (float)screenH * 0.90f;
         float fullTop = horizon - fullH * 0.5f;
