@@ -8,7 +8,7 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 - `game.js`: logica do jogo — mapa, movimento, colisao, pulo, stamina, lanterna, armario, itens e IA das anomalias.
 - `input.js`: leitura do DualShock pelo modulo `Pads`, incluindo analogicos, direcional e botoes.
 - `raycast.js`: raycaster por coluna, profundidade, iluminacao da lanterna e projecao de sprites.
-- `render.js`: renderizacao 2.5D com `Draw`, `Font` e `Color`, HUD VHS, tela inicial, morte e modelo 2D da mao/lanterna.
+- `render.js`: renderizacao 2.5D com `Draw`, `Font` e `Color`, porta branca, armario, sprites, HUD VHS e a geometria aprovada da mao/lanterna.
 
 ## Como testar no AthenaEnv
 
@@ -33,7 +33,7 @@ Nao e necessario compilar um ELF do jogo: o AthenaEnv executa os scripts JavaScr
 
 ## Estado real desta conversao
 
-**Ainda nao e a versao final nem foi validada no PS2.** A logica principal foi portada e a primeira renderizacao 2.5D ja usa as APIs documentadas do AthenaEnv. A cena atual usa paredes procedurais coloridas; a textura original do papel de parede, o modelo 3D de Steve, o audio e alguns detalhes visuais ainda precisam ser convertidos e testados. A mao/lanterna foi recriada como desenho 2D aproximado e ainda precisa de comparacao visual com a versao C++ aprovada.
+**Ainda nao e a versao final nem foi validada no PS2.** A logica principal, leitura do DualShock e loop do AthenaEnv foram ligados. A primeira renderizacao 2.5D ja desenha o cenario, porta branca, armario, itens, anomalias, HUD VHS e a mao/lanterna com os mesmos pontos geometricos do desenho aprovado. O papel de parede e os canos ainda sao aproximacoes procedurais, nao a textura bitmap original. O modelo 3D de Steve e o audio ainda precisam ser integrados e testados.
 
 O raycaster foi mantido porque e a tecnologia do jogo C++ atual; o renderer 3D de modelos do AthenaEnv pode ser integrado para personagens/objetos sem transformar o mapa inteiro em um jogo de malha 3D.
 
