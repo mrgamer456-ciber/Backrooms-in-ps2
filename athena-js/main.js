@@ -1,23 +1,38 @@
-// Ponto de entrada do port Backrooms para AthenaEnv.
-// Carregar game.js, input.js e render.js antes deste arquivo.
+// Ponto de entrada AthenaEnv. Athena executa main.js automaticamente.
 (function(root) {
   "use strict";
   function startBackroomsAthena() {
-    if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer)
-      throw new Error("Carregue game.js, input.js e render.js antes de main.js.");
+    if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer||!root.BackroomsRaycast)
+      throw new Error("Carregue game.js, input.js, raycast.js e render.js antes de main.js.");
     const game=root.BackroomsGame.makeGame();
-    root.BackroomsGame.newGame(game,0x0B4C7200);
     const renderer=root.BackroomsRenderer.createRenderer();
     renderer.init();
-    let frame=0;
-    const step=()=>{
-      // A amostragem do controle AthenaEnv sera ligada no adaptador Pads.
-      const input=root.BackroomsInput.fromAxes({});
-      root.BackroomsGame.update(game,input,1/60);
-      renderer.draw(game,frame++);
+    let pad=null;
+    if(typeof Pads!=="undefined")pad=Pads.get(0);
+    let lastTime=Date.now();
+    let started=false;
+    const tick=()=>{
+      const now=Date.now();
+      let dt=(now-lastTime)/1000;lastTime=now;
+      if(dt<=0||dt>0.1)dt=1/60;
+      const input=pad?root.BackroomsInput.readPad(pad):root.BackroomsInput.fromAxes({});
+      if(game.onTitle) {
+        if(input.restart) {
+          game.onTitle=false;
+          root.BackroomsGame.newGame(game,0x0B4C7200);
+        }
+      } else {
+        root.BackroomsGame.update(game,input,dt);
+      }
+      renderer.draw(game);
     };
-    // Mantem o loop explicito para facilitar a troca pelo scheduler/timer do runtime.
-    while(true) step();
+    // AthenaEnv usa os.setInterval no loop principal; nao bloqueia o runtime.
+    if(typeof os==="undefined"||typeof os.setInterval!=="function")
+      throw new Error("Scheduler os.setInterval nao encontrado no AthenaEnv.");
+    os.setInterval(tick,0);
+    started=true;
+    return started;
   }
   root.startBackroomsAthena=startBackroomsAthena;
+  startBackroomsAthena();
 })(this);
