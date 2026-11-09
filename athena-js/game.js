@@ -17,7 +17,7 @@
       dead: false, deadTime: 0, survived: 0, anomalies: [], items: [],
       killer: 0, pickups: 0, calmTimer: 0, walkDist: 0, flicker: 1,
       msgId: 0, msgTimer: 0, nearest: 99, bfsTimer: 0, rng: 1,
-      exitX: 38.5, exitY: 20.5, onTitle: true
+      exitX: 38.5, exitY: 20.5, onTitle: true, mapRevision: 0
     };
   }
   const at = (x,y) => y * W + x;
@@ -98,7 +98,7 @@
     }
   }
   function startLevel(g) {
-    generate(g);g.bfsTimer=0;g.nearest=99;g.calmTimer=0;g.flicker=1;
+    generate(g);g.mapRevision++;g.bfsTimer=0;g.nearest=99;g.calmTimer=0;g.flicker=1;
     g.msgId=g.level===1?MSG_FIND_DOOR:(g.level===2?MSG_PIPE:MSG_NONE);
     g.msgTimer=g.level<=2?5:0;dirs(g);distances(g);
   }
