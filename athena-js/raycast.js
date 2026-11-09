@@ -75,4 +75,4 @@
     return list;
   }
   root.BackroomsRaycast={cast,project,sprites,RAY_COLS,MAX_VIEW};
-})(this);
+})(globalThis);
