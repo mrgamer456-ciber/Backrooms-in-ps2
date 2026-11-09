@@ -266,7 +266,65 @@ static void drawDead(GSGLOBAL *gs, uint32_t frame)
         drawTextCentered(gs, H * 0.91f, 2.0f, rgb(240, 240, 240), "APERTE START");
 }
 
-static void drawWorld(GSGLOBAL *gs)
+// HUD de filmadora VHS: contador real, REC, bateria, moldura e interferencia.
+static void drawVhsOverlay(GSGLOBAL *gs, uint32_t frame)
+{
+    const float W = (float)gs->Width, H = (float)gs->Height;
+    const float s = 2.0f;
+    const float pad = 13.0f;
+    const u64 white = rgb(232, 235, 218);
+    const u64 dim = rgb(150, 157, 139);
+
+    // Moldura de visor nos quatro cantos.
+    rect(gs, pad, pad, pad + 54, pad + 3, white);
+    rect(gs, pad, pad, pad + 3, pad + 35, white);
+    rect(gs, W - pad - 54, pad, W - pad, pad + 3, white);
+    rect(gs, W - pad - 3, pad, W - pad, pad + 35, white);
+    rect(gs, pad, H - pad - 3, pad + 54, H - pad, white);
+    rect(gs, pad, H - pad - 35, pad + 3, H - pad, white);
+    rect(gs, W - pad - 54, H - pad - 3, W - pad, H - pad, white);
+    rect(gs, W - pad - 3, H - pad - 35, W - pad, H - pad, white);
+
+    // Indicador REC piscando.
+    if (((frame / 25u) & 1u) == 0)
+        rect(gs, 38, 30, 50, 42, rgb(235, 22, 18));
+    drawTextShadow(gs, 60, 27, 3.0f, white, "REC");
+
+    // Indicador de bateria no canto superior direito.
+    float bx = W - 68.0f, by = 27.0f;
+    rect(gs, bx, by, bx + 43, by + 19, white);
+    rect(gs, bx + 43, by + 5, bx + 47, by + 14, white);
+    rect(gs, bx + 3, by + 3, bx + 40, by + 16, rgb(25, 28, 22));
+    rect(gs, bx + 5, by + 5, bx + 14, by + 14, rgb(190, 220, 178));
+    rect(gs, bx + 16, by + 5, bx + 25, by + 14, rgb(190, 220, 178));
+    rect(gs, bx + 27, by + 5, bx + 36, by + 14, rgb(190, 220, 178));
+
+    // Contador HH:MM:SS baseado no tempo real sobrevivido na partida.
+    int seconds = (int)g.survived + 1;
+    if (seconds < 1) seconds = 1;
+    char clockText[24];
+    snprintf(clockText, sizeof(clockText), "%02d:%02d:%02d",
+             seconds / 3600, (seconds / 60) % 60, seconds % 60);
+    drawTextShadow(gs, 35, H - 69, 3.0f, white, clockText);
+
+    // Ruido horizontal curto e irregular, sem encobrir a visao do jogador.
+    for (int i = 0; i < 9; i++) {
+        uint32_t h = frame * 37u + (uint32_t)i * 7919u;
+        float y = 54.0f + hashf(h) * (H - 108.0f);
+        float x = hashf(h + 17u) * (W - 45.0f);
+        float len = 5.0f + hashf(h + 31u) * 38.0f;
+        if ((h & 3u) != 0)
+            rect(gs, x, y, x + len, y + 1.0f, (i & 1) ? dim : white);
+    }
+
+    // Linhas de tracking na parte inferior, aparecendo de forma irregular.
+    if ((frame % 47u) < 3u) {
+        float y = H - 20.0f - hashf(frame) * 24.0f;
+        rect(gs, 18, y, W * (0.18f + 0.55f * hashf(frame + 9u)), y + 1.0f, dim);
+    }
+}
+
+static void drawWorld(GSGLOBAL *gs, uint32_t frame)
 {
     const float W = (float)gs->Width, H = (float)gs->Height;
     const float colW = W / (float)bk::RAY_COLS;
@@ -556,6 +614,9 @@ static void drawWorld(GSGLOBAL *gs)
         const char *m = (g.msgId == bk::MSG_FIND_DOOR) ? "ENCONTRE A PORTA ABERTA COM A LUZ BRANCA" : "AGUA DE AMENDOA!";
         drawTextCentered(gs, H * 0.78f, 3.0f, rgb(250, 250, 240), m);
     }
+
+    // Camada final da filmadora: fica por cima do mundo e do HUD.
+    drawVhsOverlay(gs, frame);
 }
 
 // ======================= main =======================
@@ -601,7 +662,7 @@ int main()
                 drawDead(gs, frame);
             } else {
                 bk::castRays(g, gs->Height);
-                drawWorld(gs);
+                drawWorld(gs, frame);
             }
         }
 
