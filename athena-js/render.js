@@ -122,33 +122,58 @@
       return {x:w*.5*(1+tx/ty),size:h/ty,depth:ty,horizon};
     }
     function drawSprites(g,scene) {
-      // Desenha primeiro os objetos distantes para manter a ordem de profundidade.
       const all=[];
       for(let i=0;i<g.items.length;i++)if(g.items[i].active) {
         const p=projectCenter(g,g.items[i].x,g.items[i].y);
         if(p)all.push({kind:"item",p});
       }
-      for(let i=0;i<g.anomalies.length;i++) {
-        const a=g.anomalies[i],p=projectCenter(g,a.x,a.y);
-        if(p)all.push({kind:"enemy",p,type:a.type,seen:a.seen});
+      if(g.enemyHiddenTimer<=0) {
+        for(let i=0;i<g.anomalies.length;i++) {
+          const a=g.anomalies[i],p=projectCenter(g,a.x,a.y);
+          if(p)all.push({kind:"enemy",p,type:a.type});
+        }
       }
       all.sort((a,b)=>b.p.depth-a.p.depth);
+      const colW=w/scene.columns.length;
       for(const s of all) {
-        const centerCol=Math.max(0,Math.min(scene.columns.length-1,(s.p.x/(w/scene.columns.length))|0));
-        if(s.p.depth>=scene.columns[centerCol].depth)continue;
-        if(s.kind==="enemy"&&g.enemyHiddenTimer>0)continue;
-        const size=Math.max(3,Math.min(h*1.2,s.p.size*.72));
-        const x=s.p.x-size*.5,y=s.p.horizon-size*.5;
+        const p=s.p,lh=p.size,cx=p.x;
+        const cm=(cx/colW)|0;
+        if(cm<0||cm>=scene.columns.length||p.depth>=scene.columns[cm].depth)continue;
+        const floorY=p.horizon+lh*.5;
         if(s.kind==="item") {
-          rect(x+size*.36,y+size*.35,size*.28,size*.42,color(170,190,130));
-          rect(x+size*.30,y+size*.30,size*.40,size*.10,color(210,220,180));
+          const ch=lh*.14,cw=lh*.055;
+          const vis=Math.max(.3,1-p.depth/12)*g.flicker;
+          rect(cx-cw*1.6,floorY-ch*1.25,cw*3.2,ch*1.25,color(15*vis,45*vis,90*vis));
+          rect(cx-cw,floorY-ch,cw*2,ch,color(60*vis,140*vis,255*vis));
+          rect(cx-cw,floorY-ch*.66,cw*2,ch*.30,color(240*vis,240*vis,240*vis));
+          rect(cx-cw*.6,floorY-ch*1.12,cw*1.2,ch*.12,color(200*vis,200*vis,210*vis));
+          continue;
+        }
+        const sprH=lh*.92,topY=floorY-sprH,headH=sprH*.20;
+        const halfW=lh*.15,headHalf=halfW*.9;
+        const vis=Math.max(.15,1-p.depth/12);
+        let bodyCol,headCol,eyeCol;
+        if(s.type===1) {
+          bodyCol=color(190*vis,190*vis,180*vis);
+          headCol=color(235*vis,235*vis,225*vis);eyeCol=color(0,0,0);
+        } else if(s.type===2) {
+          bodyCol=color(55*vis,4,4);headCol=color(170*vis,25,25);eyeCol=color(255,255,255);
         } else {
-          const red=s.type===2;
-          const face=red?color(145,20,20):color(215,215,200);
-          rect(x+size*.22,y+size*.12,size*.56,size*.78,face);
-          rect(x+size*.30,y+size*.34,size*.12,size*.10,color(5,5,5));
-          rect(x+size*.58,y+size*.34,size*.12,size*.10,color(5,5,5));
-          if(s.type!==1)rect(x+size*.35,y+size*.66,size*.30,size*.06,color(0,0,0));
+          bodyCol=color(8,8,8);headCol=color(235*vis,235*vis,225*vis);eyeCol=color(0,0,0);
+        }
+        let c0=Math.max(0,Math.floor((cx-halfW)/colW));
+        let c1=Math.min(scene.columns.length-1,Math.floor((cx+halfW)/colW));
+        for(let col=c0;col<=c1;col++) {
+          if(p.depth>=scene.columns[col].depth)continue;
+          const x0=col*colW,x1=x0+colW,xm=(x0+x1)*.5;
+          rect(x0,topY+headH,colW,floorY-(topY+headH),bodyCol);
+          if(Math.abs(xm-cx)<headHalf)rect(x0,topY,colW,headH,headCol);
+        }
+        if(p.depth<scene.columns[cm].depth) {
+          const eyeSize=headH*(s.type===1?.34:.20),eyeY=topY+headH*.30;
+          rect(cx-headHalf*.55,eyeY,eyeSize,eyeSize,eyeCol);
+          rect(cx+headHalf*.55-eyeSize,eyeY,eyeSize,eyeSize,eyeCol);
+          if(s.type!==1)rect(cx-headHalf*.7,topY+headH*.68,headHalf*1.4,headH*.10,color(0,0,0));
         }
       }
     }
