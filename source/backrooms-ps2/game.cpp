@@ -197,6 +197,7 @@ void newGame(Game& g, uint32_t seed) {
     g.survived = 0;
     g.stamina = 1.0f;
     g.exhausted = false;
+    g.flashlight = false;
     g.angle = 0;
     g.pitch = 0;
     startLevel(g);
@@ -236,6 +237,7 @@ void update(Game& g, const Input& in, float dt) {
         return;
     }
     g.survived += dt;
+    if (in.toggleFlashlight) g.flashlight = !g.flashlight;
     g.angle += in.turn * TURN_SPEED * dt;
     g.pitch += in.lookY * 1.35f * dt;
     if (g.pitch > 0.38f) g.pitch = 0.38f;
