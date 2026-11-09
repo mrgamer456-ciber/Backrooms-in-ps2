@@ -9,7 +9,7 @@ import "audio.js";
   "use strict";
   function startBackroomsAthena() {
     if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer||!root.BackroomsRaycast||!root.BackroomsAudio)
-      throw new Error("Carregue game.js, input.js, raycast.js e render.js antes de main.js.");
+      throw new Error("Carregue game.js, input.js, raycast.js, render.js e audio.js antes de main.js.");
     const game=root.BackroomsGame.makeGame();
     const renderer=root.BackroomsRenderer.createRenderer();
     renderer.init();
@@ -17,7 +17,6 @@ import "audio.js";
     let pad=null;
     if(typeof Pads!=="undefined")pad=Pads.get(0);
     let lastTime=Date.now();
-    let started=false;
     const tick=()=>{
       const now=Date.now();
       let dt=(now-lastTime)/1000;lastTime=now;
@@ -38,8 +37,7 @@ import "audio.js";
     if(typeof os==="undefined"||typeof os.setInterval!=="function")
       throw new Error("Scheduler os.setInterval nao encontrado no AthenaEnv.");
     os.setInterval(tick,0);
-    started=true;
-    return started;
+    return true;
   }
   root.startBackroomsAthena=startBackroomsAthena;
   startBackroomsAthena();
