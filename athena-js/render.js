@@ -234,9 +234,9 @@
       const size=h*.50,cx=w*.5+Math.sin(frame)*3,top=h*.06;
       const runner=g.killer===2,stalker=g.killer===1;
       rect(cx-size*.5,top,size,size*.9,runner?color(170,25,25):color(225,225,212));
-      const eyeW=size*(stalker?.16:.10);
+      const eyeW=size*(stalker ? 0.16 : 0.10);
       const eye=runner?color(255,255,255):color(0,0,0);
-      rect(cx-size*(.20+(stalker?.16:.10)),top+size*.9*.26,size*.10+eyeW*.25,size*.9*.20,eye);
+      rect(cx-size*(.20+(stalker ? 0.16 : 0.10)),top+size*.9*.26,size*.10+eyeW*.25,size*.9*.20,eye);
       rect(cx+size*.10,top+size*.9*.26,size*(.10+eyeW*.25),size*.9*.20,eye);
       if(!stalker)rect(cx-size*.34,top+size*.9*.62,size*.68,size*.9*.10,color(0,0,0));
       const sec=g.survived|0;
