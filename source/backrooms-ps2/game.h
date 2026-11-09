@@ -12,7 +12,7 @@ constexpr int RAY_COLS = 320;
 constexpr float MAX_VIEW = 14.0f;
 
 struct Input {
-    float moveX = 0, moveY = 0, turn = 0;  // -1..1
+    float moveX = 0, moveY = 0, turn = 0, lookY = 0;  // -1..1
     bool sprint = false;
     bool restart = false;
 };
@@ -58,7 +58,7 @@ struct SpriteView {
 struct Game {
     uint8_t map[MAP_H][MAP_W];  // 0 = chao, 1 = parede, 2 = saida
     int dist[MAP_H][MAP_W];     // distancia (BFS) ate o jogador
-    float px, py, angle;
+    float px, py, angle, pitch;
     float dirX, dirY, planeX, planeY;
     float stamina;
     bool exhausted;
