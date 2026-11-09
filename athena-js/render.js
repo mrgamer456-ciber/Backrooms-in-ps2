@@ -232,11 +232,17 @@
     function drawDead(g) {
       rect(0,0,w,h,color(0,0,0));
       const size=h*.50,cx=w*.5+Math.sin(frame)*3,top=h*.06;
-      rect(cx-size*.5,top,size,size*.9,color(g.killer===2?170:225,g.killer===2?25:225,g.killer===2?25:212));
-      rect(cx-size*.3,top+size*.26,size*.2,size*.2,color(0,0,0));
-      rect(cx+size*.1,top+size*.26,size*.2,size*.2,color(0,0,0));
+      const runner=g.killer===2,stalker=g.killer===1;
+      rect(cx-size*.5,top,size,size*.9,runner?color(170,25,25):color(225,225,212));
+      const eyeW=size*(stalker?.16:.10);
+      const eye=runner?color(255,255,255):color(0,0,0);
+      rect(cx-size*(.20+(stalker?.16:.10)),top+size*.9*.26,size*.10+eyeW*.25,size*.9*.20,eye);
+      rect(cx+size*.10,top+size*.9*.26,size*(.10+eyeW*.25),size*.9*.20,eye);
+      if(!stalker)rect(cx-size*.34,top+size*.9*.62,size*.68,size*.9*.10,color(0,0,0));
+      const sec=g.survived|0;
+      const clock=("0"+((sec/60)|0)).slice(-2)+":"+("0"+(sec%60)).slice(-2);
       text(w*.5-75,h*.74,"VOCE FOI PEGO",color(200,20,20),1.5);
-      text(w*.5-70,h*.84,"NIVEL "+g.level+"  TEMPO "+(g.survived|0)+"s",color(220,220,220),1);
+      text(w*.5-85,h*.84,"NIVEL "+g.level+"  TEMPO "+clock,color(220,220,220),1);
       if(g.deadTime>1.5&&(frame/30|0)%2===0)text(w*.5-55,h*.92,"APERTE START",color(240,240,240),1);
     }
     return {
