@@ -3,7 +3,7 @@
 // Este modulo prepara geometria por coluna; nao depende de gsKit nem de APIs graficas.
 (function(root) {
   "use strict";
-  const W=40,H=40,MAX_VIEW=12,RAY_COLS=160;
+  const W=40,H=40,MAX_VIEW=12,RAY_COLS=80;
   const at=(x,y)=>y*W+x;
   function cast(game,screenW,screenH,columns) {
     const count=columns||RAY_COLS, out=new Array(count);
