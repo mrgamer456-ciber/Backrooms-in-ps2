@@ -53,6 +53,8 @@ static void initModules()
 static bool padOpened = false;
 static bool padModeRequested = false;
 static bool l1WasDown = false;
+static bool xWasDown = false;
+static bool squareWasDown = false;
 
 // A deteccao de alguns controles paralelos demora mais que a inicializacao
 // do jogo. Por isso, a troca para analogico e tentada durante o jogo tambem.
@@ -159,7 +161,13 @@ static bk::Input readInput()
         bool l1Down = (b & PAD_L1) != 0;
         in.toggleFlashlight = l1Down && !l1WasDown;
         l1WasDown = l1Down;
-        in.restart = (b & (PAD_START | PAD_CROSS)) != 0; // X reinicia; correr permanece no R1
+        bool xDown = (b & PAD_CROSS) != 0;
+        in.jump = xDown && !xWasDown;
+        xWasDown = xDown;
+        bool squareDown = (b & PAD_SQUARE) != 0;
+        in.interact = squareDown && !squareWasDown;
+        squareWasDown = squareDown;
+        in.restart = (b & (PAD_START | PAD_R2)) != 0; // R2 ou START reinicia; X pula
     }
     return in;
 }
@@ -396,26 +404,30 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
 
     // Teto do Level 1: superficie amarelo-creme lisa, diferente do papel de parede.
     // O horizonte acompanha a inclinacao vertical do analógico direito.
-    const float horizon = H * (0.5f + g.pitch);
-    const int bands = 12;
+    float horizon = H * (0.5f + g.pitch) + g.jumpHeight * H * 0.35f;
+    if (horizon < H * 0.12f) horizon = H * 0.12f;
+    if (horizon > H * 0.90f) horizon = H * 0.90f;
+    const int bands = 16;
+    const float floorStart = horizon;
+    const float floorSpan = H - floorStart;
     for (int i = 0; i < bands; i++) {
         float t = ((float)i + 0.5f) / (float)bands;
-        float k = (0.72f * (1.0f - t) + 0.16f) * flick;
         float y0 = horizon * (float)i / bands, y1 = horizon * (float)(i + 1) / bands;
         if (g.level == 2) {
             float industrial = (0.58f * (1.0f - t) + 0.10f) * flick;
             rect(gs, 0, y0, W, y1, rgb(72 * industrial, 76 * industrial, 72 * industrial));
-            // Travessas escuras no teto de concreto.
             if ((i % 3) == 0) rect(gs, 0, y0, W, y0 + 2.0f, rgb(28, 29, 27));
         } else {
+            float k = (0.72f * (1.0f - t) + 0.16f) * flick;
             rect(gs, 0, y0, W, y1, rgb(218 * k, 211 * k, 166 * k));
         }
-        float k2 = (0.50f * (1.0f - t) + 0.08f) * flick;
-        float f0 = H - y1, f1 = H - y0;
+        float fy0 = floorStart + floorSpan * (float)i / bands;
+        float fy1 = floorStart + floorSpan * (float)(i + 1) / bands;
+        float floorShade = (0.50f * (1.0f - t) + 0.08f) * flick;
         if (g.level == 2)
-            rect(gs, 0, f0, W, f1, rgb(43 * k2, 42 * k2, 37 * k2));
+            rect(gs, 0, fy0, W, fy1, rgb(43 * floorShade, 42 * floorShade, 37 * floorShade));
         else
-            rect(gs, 0, f0, W, f1, rgb(120 * k2, 95 * k2, 50 * k2));
+            rect(gs, 0, fy0, W, fy1, rgb(120 * floorShade, 95 * floorShade, 50 * floorShade));
     }
 
     // Luminarias fluorescentes retangulares no teto, em perspectiva.
