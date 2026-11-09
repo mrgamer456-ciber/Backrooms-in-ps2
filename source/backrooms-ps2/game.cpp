@@ -461,7 +461,9 @@ void castRays(Game& g, int screenH) {
         if (perp < 0.05f) perp = 0.05f;
 
         float fullH = (float)screenH / perp;
-        float horizon = (float)screenH * (0.5f + g.pitch);
+        float horizon = (float)screenH * (0.5f + g.pitch) + g.jumpHeight * (float)screenH * 0.35f;
+        if (horizon < (float)screenH * 0.12f) horizon = (float)screenH * 0.12f;
+        if (horizon > (float)screenH * 0.90f) horizon = (float)screenH * 0.90f;
         float fullTop = horizon - fullH * 0.5f;
         int lineH = (int)fullH;
         int top = (int)(horizon - lineH * 0.5f);
