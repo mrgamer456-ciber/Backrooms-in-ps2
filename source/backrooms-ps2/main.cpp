@@ -259,7 +259,7 @@ static void drawTitle(GSGLOBAL *gs, uint32_t frame)
     drawText(gs, (W - textWidth("BACKROOMS", s)) / 2.0f, H * 0.34f, s, rgb(50, 40, 5), "BACKROOMS");
     drawText(gs, (W - textWidth("NIVEL 0", 3.0f)) / 2.0f, H * 0.50f, 3.0f, rgb(90, 75, 15), "NIVEL 0");
     if (((frame / 30u) & 1u) == 0)
-        drawTextCentered(gs, H * 0.68f, 3.0f, rgb(240, 240, 240), "APERTE START");
+        drawTextCentered(gs, H * 0.68f, 3.0f, rgb(240, 240, 240), "APERTE START OU R2");
     drawTextCentered(gs, H * 0.80f, 2.0f, rgb(200, 200, 190), "ANALOGICO DIREITO: OLHAR E VIRAR");
     drawTextCentered(gs, H * 0.86f, 2.0f, rgb(200, 200, 190), "R1: CORRER   L1: LANTERNA");
 }
@@ -613,6 +613,27 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
         }
     }
 
+    // Armario industrial do Pipe Dreams, projetado na alcova lateral.
+    if (g.level == 2 && g.cabinetCount > 0) {
+        const bk::Cabinet &cab = g.cabinets[0];
+        float dx = cab.x - g.px, dy = cab.y - g.py;
+        float depth = dx * g.dirX + dy * g.dirY;
+        float side = dx * (-g.dirY) + dy * g.dirX;
+        if (depth > 0.2f) {
+            float cx = W * 0.5f * (1.0f + side / (depth * 0.66f));
+            float hh = H / depth * 0.78f, ww = hh * 0.48f;
+            float base = horizon + hh * 0.50f;
+            int col = (int)(cx / colW);
+            if (col >= 0 && col < bk::RAY_COLS && depth < g.cols[col].depth + 0.6f) {
+                rect(gs,cx-ww*0.55f,base-hh,cx+ww*0.55f,base,rgb(22,25,27));
+                rect(gs,cx-ww*0.48f,base-hh*0.96f,cx+ww*0.48f,base-hh*0.03f,rgb(82,91,94));
+                rect(gs,cx-ww*0.40f,base-hh*0.88f,cx+ww*0.40f,base-hh*0.10f,rgb(48,56,59));
+                rect(gs,cx-ww*0.035f,base-hh*0.84f,cx+ww*0.035f,base-hh*0.13f,rgb(125,133,132));
+                rect(gs,cx+ww*0.24f,base-hh*0.55f,cx+ww*0.29f,base-hh*0.43f,rgb(190,145,55));
+            }
+        }
+    }
+
     // itens: agua de amendoa
     for (int i = 0; i < g.itemCount; i++) {
         if (!g.items[i].active) continue;
@@ -632,6 +653,8 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
         rect(gs, cx - cw * 0.6f, floorY - ch * 1.12f, cx + cw * 0.6f, floorY - ch, rgb(200 * vis, 200 * vis, 210 * vis));  // tampa
     }
 
+    // Anomalia desaparece durante o tempo de protecao do armario.
+    if (g.enemyHiddenTimer <= 0.0f) {
     // anomalias (de tras para frente)
     bk::SpriteView sv[bk::MAX_ANOMALIES];
     int order[bk::MAX_ANOMALIES];
@@ -695,6 +718,7 @@ static void drawWorld(GSGLOBAL *gs, uint32_t frame)
         }
     }
 
+    }
     // Modelo da mao segurando a lanterna em primeira pessoa.
     drawHandFlashlight(gs);
 
