@@ -48,7 +48,7 @@
     }
     // Paredes: so cria as faces que ficam voltadas para celulas transitaveis.
     const wallMat=g.level===2?"pipewall":"wallpaper";
-    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(tile(g,x,y)===1) {
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(tile(g,x,y)===1||tile(g,x,y)===2) {
       if(tile(g,x,y-1)===0)quad(wallMat,[vec(x+1,0,y),vec(x,0,y),vec(x,WALL_H,y),vec(x+1,WALL_H,y)],uvWall,[0,0,-1]);
       if(tile(g,x,y+1)===0)quad(wallMat,[vec(x,0,y+1),vec(x+1,0,y+1),vec(x+1,WALL_H,y+1),vec(x,WALL_H,y+1)],uvWall,[0,0,1]);
       if(tile(g,x-1,y)===0)quad(wallMat,[vec(x,0,y),vec(x,0,y+1),vec(x,WALL_H,y+1),vec(x,WALL_H,y)],uvWall,[-1,0,0]);
