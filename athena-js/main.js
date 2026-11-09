@@ -21,9 +21,12 @@ import "world3d.js";
     const textures=root.BackroomsAssets.load();
     if(!textures)
       throw new Error("AthenaEnv nao conseguiu carregar as texturas BMP do Backrooms.");
-    const world3d=root.BackroomsWorld3D.create();
-    world3d.init();
-    renderer.init(textures,world3d);
+    // Diagnostico temporario: desativa o renderer VU1 nativo.
+    // O teste basico de AthenaEnv funciona, mas o VU1 ainda gera EE Exception
+    // dentro de draw_vui_with_colors. Mantemos o raycaster 2.5D para testar
+    // movimento, colisao, HUD e gameplay sem chamar o caminho 3D nativo.
+    const world3d=null;
+    renderer.init(textures,null);
     const audio=root.BackroomsAudio.create();
     let pad=null;
     if(typeof Pads!=="undefined")pad=Pads.get(0);
@@ -41,7 +44,7 @@ import "world3d.js";
       } else {
         root.BackroomsGame.update(game,input,dt);
       }
-      if(!game.onTitle&&world3d.revision!==game.mapRevision)world3d.rebuild(game);
+      // world3d desativado durante o diagnostico do renderer VU1.
       root.BackroomsAudio.update(audio,game,dt);
       renderer.draw(game);
     };
