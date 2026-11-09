@@ -3,7 +3,7 @@
 (function(root) {
   "use strict";
   function createRenderer() {
-    let initialized=false,w=640,h=448,font=null,frame=0;
+    let initialized=false,w=640,h=448,font=null,frame=0,wallTexture=null,pipeTexture=null;
     const color=(r,g,b,a)=>Color.new(
       Math.max(0,Math.min(255,r|0)),Math.max(0,Math.min(255,g|0)),
       Math.max(0,Math.min(255,b|0)),a===undefined?128:a);
@@ -58,6 +58,22 @@
         else if(g.level===2){r=87;gr=78;bl=63;}
         else {r=205;gr=186;bl=84;}
         const wallW=c.x2-c.x,wallH=c.bottom-c.top;
+        if(c.type===1) {
+          const tex=(g.level===2)?pipeTexture:wallTexture;
+          if(tex) {
+            const tsize=128;
+            let u=Math.floor(c.u*tsize);
+            if(u>tsize-1)u=tsize-1;
+            let v1=(c.top-c.fullTop)/c.fullH*tsize;
+            let v2=(c.bottom-c.fullTop)/c.fullH*tsize;
+            if(v1<0)v1=0;if(v2>tsize)v2=tsize;
+            tex.startx=u;tex.starty=v1;tex.endx=u+1;tex.endy=v2;
+            tex.width=wallW;tex.height=wallH;
+            tex.color=color(128*b,128*b,128*b);
+            tex.draw(c.x,c.top);
+            continue;
+          }
+        }
         if(c.type!==2&&g.level===1) {
           const texX=(c.u*128)|0,sx=texX%32;
           const stain=0.90+(((texX*17+((c.depth*13)|0)*29)&15)/150);
@@ -246,13 +262,14 @@
       if(g.deadTime>1.5&&(frame/30|0)%2===0)text(w*.5-55,h*.92,"APERTE START",color(240,240,240),1);
     }
     return {
-      init() {
+      init(textures) {
         if(typeof Screen==="undefined"||typeof Draw==="undefined"||typeof Font==="undefined"||typeof Color==="undefined")
           throw new Error("AthenaEnv precisa dos modulos Screen, Draw, Font e Color.");
         Screen.setParam(Screen.DEPTH_TEST_ENABLE,false);
         Screen.setVSync(true);
         const mode=Screen.getMode();w=mode.width;h=mode.height;
         font=new Font("default");font.scale=1;
+        if(textures){wallTexture=textures.wall||null;pipeTexture=textures.pipe||null;}
         initialized=true;
       },
       draw(game) {
