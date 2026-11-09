@@ -3,9 +3,9 @@
 (function(root) {
   "use strict";
   const edgeState={l1:false,x:false,square:false};
-  function clamp(v){return Math.max(-1,Math.min(1,v||0));}
+  function clamp(v){return Math.max(-128,Math.min(128,v||0));}
   function axis(v,dead) {
-    const n=clamp((v||0)/128);
+    const n=Math.max(-1,Math.min(1,(v||0)/128));
     return Math.abs(n)<(dead===undefined?0.22:dead)?0:n;
   }
   function edge(now,key) {
@@ -24,17 +24,17 @@
     };
   }
   function readPad(pad) {
-    if(typeof Pads==="undefined"||!pad) return fromAxes({});
+    if(typeof Pads==="undefined"||!pad)return fromAxes({});
     pad.update();
     const down=(button)=>pad.pressed(button);
-    let moveY=-axis(pad.ly),turn=axis(pad.rx);
-    if(down(Pads.UP))moveY+=1;
-    if(down(Pads.DOWN))moveY-=1;
-    if(down(Pads.LEFT))turn-=1;
-    if(down(Pads.RIGHT))turn+=1;
+    let moveY=-pad.ly,turn=pad.rx;
+    if(down(Pads.UP))moveY+=128;
+    if(down(Pads.DOWN))moveY-=128;
+    if(down(Pads.LEFT))turn-=128;
+    if(down(Pads.RIGHT))turn+=128;
     return fromAxes({
       moveX:pad.lx,moveY:clamp(moveY),turn:clamp(turn),
-      lookY:-axis(pad.ry),r1:down(Pads.R1),
+      lookY:-pad.ry,r1:down(Pads.R1),
       l1:down(Pads.L1),x:down(Pads.CROSS),
       square:down(Pads.SQUARE),
       start:down(Pads.START),r2:down(Pads.R2)
