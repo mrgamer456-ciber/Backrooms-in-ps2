@@ -312,8 +312,9 @@ static void drawWorld(GSGLOBAL *gs)
 #endif
         float r, gr, bl;
         if (c.type == 2) {
-            if (b < 0.65f) b = 0.65f;
-            r = 30; gr = 230; bl = 90;
+            // A saida agora e branca e mais clara que as paredes do corredor.
+            if (b < 1.0f) b = 1.0f;
+            r = 255; gr = 255; bl = 255;
         } else {
             r = 205; gr = 186; bl = 84;
         }
@@ -326,7 +327,7 @@ static void drawWorld(GSGLOBAL *gs)
         const float det = g.planeX * g.dirY - g.dirX * g.planeY;
         const float invDet = fabsf(det) > 0.0001f ? 1.0f / det : 0.0f;
         const float W = (float)gs->Width, H = (float)gs->Height;
-        const float glow = 0.82f + 0.18f * g.flicker;
+        const float glow = 1.05f + 0.25f * g.flicker;
         const int ex = (int)g.exitX, ey = (int)g.exitY;
 
         // A porta fica virada para o corredor livre junto ao bloco de parede.
@@ -369,15 +370,19 @@ static void drawWorld(GSGLOBAL *gs)
 
         if (visible) {
             // Luz e passagem ao fundo, recuadas em relacao ao batente.
-            face(point(-0.35f,0.012f,0.02f),point(0.35f,0.012f,0.02f),
-                 point(0.35f,0.012f,0.94f),point(-0.35f,0.012f,0.94f),
-                 rgb(15*glow,95*glow,115*glow));
+            // Halo branco forte em camadas: brilho suave, luz intensa e nucleo quase branco.
+            face(point(-0.39f,0.010f,0.00f),point(0.39f,0.010f,0.00f),
+                 point(0.39f,0.010f,0.98f),point(-0.39f,0.010f,0.98f),
+                 rgb(145*glow,145*glow,155*glow));
+            face(point(-0.35f,0.014f,0.02f),point(0.35f,0.014f,0.02f),
+                 point(0.35f,0.014f,0.94f),point(-0.35f,0.014f,0.94f),
+                 rgb(205*glow,205*glow,210*glow));
             face(point(-0.29f,0.018f,0.05f),point(0.29f,0.018f,0.05f),
                  point(0.29f,0.018f,0.90f),point(-0.29f,0.018f,0.90f),
-                 rgb(125*glow,215*glow,225*glow));
+                 rgb(245*glow,245*glow,245*glow));
             face(point(-0.15f,0.024f,0.08f),point(0.15f,0.024f,0.08f),
                  point(0.15f,0.024f,0.86f),point(-0.15f,0.024f,0.86f),
-                 rgb(235*glow,250*glow,240*glow));
+                 rgb(255,255,255));
 
             // Batente: dois montantes, travessa superior e faces de profundidade.
             face(point(-0.43f,0.075f,0),point(-0.33f,0.075f,0),
@@ -527,7 +532,7 @@ static void drawWorld(GSGLOBAL *gs)
         rect(gs, 22, H - 42, 22 + 120 * f, H - 38, rgb(60, 140, 255));
     }
     if (g.msgTimer > 0 && g.msgId != bk::MSG_NONE) {
-        const char *m = (g.msgId == bk::MSG_FIND_DOOR) ? "ENCONTRE A PORTA VERDE" : "AGUA DE AMENDOA!";
+        const char *m = (g.msgId == bk::MSG_FIND_DOOR) ? "ENCONTRE A PORTA ABERTA COM A LUZ BRANCA" : "AGUA DE AMENDOA!";
         drawTextCentered(gs, H * 0.78f, 3.0f, rgb(250, 250, 240), m);
     }
 }
