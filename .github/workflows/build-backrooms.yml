@@ -1,6 +1,8 @@
 name: 2 - Compilar Backrooms PS2 ELF
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
   workflow_run:
     workflows: ["1 - Extrair Backrooms PS2"]
