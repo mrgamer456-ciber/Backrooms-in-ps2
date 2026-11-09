@@ -1,3 +1,4 @@
+// {"name":"Backrooms","author":"Backrooms PS2","version":"0.1","file":"main.js"}
 import "game.js";
 import "input.js";
 import "raycast.js";
@@ -51,5 +52,34 @@ import "world3d.js";
     return true;
   }
   root.startBackroomsAthena=startBackroomsAthena;
-  startBackroomsAthena();
+  try {
+    startBackroomsAthena();
+  } catch(e) {
+    const message=String(e&&e.stack?e.stack:e);
+    try {
+      if(typeof Screen!=="undefined"&&typeof Draw!=="undefined"&&typeof Color!=="undefined") {
+        Screen.setParam(Screen.DEPTH_TEST_ENABLE,false);
+        const font=new Font("default");
+        const lines=[];
+        let line="";
+        for(const word of message.split(" ")) {
+          if((line+" "+word).length>48){lines.push(line);line=word;}
+          else line+=(line?" ":"")+word;
+        }
+        if(line)lines.push(line);
+        os.setInterval(()=>{
+          Screen.clear(Color.new(0,0,0,255));
+          Draw.rect(12,12,616,54,Color.new(90,0,0,255));
+          font.color=Color.new(255,255,255,255);
+          font.print(22,24,"BACKROOMS - ERRO AO INICIAR");
+          for(let i=0;i<Math.min(lines.length,18);i++)
+            font.print(18,82+i*18,lines[i]);
+          Screen.flip();
+        },0);
+      }
+    } catch(debugError) {
+      if(typeof std!=="undefined"&&std.err)std.err.puts("Backrooms startup error: "+message+" | debug screen: "+debugError+"\\n");
+    }
+    if(typeof std!=="undefined"&&std.err)std.err.puts("Backrooms startup error: "+message+"\\n");
+  }
 })(globalThis);
