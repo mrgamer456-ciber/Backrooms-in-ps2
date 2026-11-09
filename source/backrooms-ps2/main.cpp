@@ -159,7 +159,7 @@ static bk::Input readInput()
         bool l1Down = (b & PAD_L1) != 0;
         in.toggleFlashlight = l1Down && !l1WasDown;
         l1WasDown = l1Down;
-        in.restart = (b & PAD_START) != 0; // X nao corre nem reinicia a partida
+        in.restart = (b & (PAD_START | PAD_CROSS)) != 0; // X reinicia; correr permanece no R1
     }
     return in;
 }
