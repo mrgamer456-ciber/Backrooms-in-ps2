@@ -4,16 +4,19 @@ import "raycast.js";
 import "font.js";
 import "render.js";
 import "audio.js";
+import "assets.js";
 
 // Ponto de entrada AthenaEnv. Athena executa main.js automaticamente.
 (function(root) {
   "use strict";
   function startBackroomsAthena() {
-    if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer||!root.BackroomsRaycast||!root.BackroomsAudio)
-      throw new Error("Carregue game.js, input.js, raycast.js, render.js e audio.js antes de main.js.");
+    if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer||!root.BackroomsRaycast||!root.BackroomsAudio||!root.BackroomsAssets||!root.BackroomsFont)
+      throw new Error("Carregue game.js, input.js, raycast.js, render.js, audio.js, assets.js e font.js antes de main.js.");
     const game=root.BackroomsGame.makeGame();
     const renderer=root.BackroomsRenderer.createRenderer();
-    renderer.init();
+    let textures=null;
+    if(root.BackroomsAssets.create())textures=root.BackroomsAssets.load();
+    renderer.init(textures);
     const audio=root.BackroomsAudio.create();
     let pad=null;
     if(typeof Pads!=="undefined")pad=Pads.get(0);
