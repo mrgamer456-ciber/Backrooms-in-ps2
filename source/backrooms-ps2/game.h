@@ -14,6 +14,8 @@ constexpr float MAX_VIEW = 14.0f;
 struct Input {
     float moveX = 0, moveY = 0, turn = 0, lookY = 0;  // -1..1
     bool sprint = false;
+    bool jump = false;
+    bool interact = false;
     bool toggleFlashlight = false;
     bool restart = false;
 };
@@ -36,6 +38,11 @@ struct Anomaly {
 struct Item {
     float x = 0, y = 0;
     bool active = false;
+};
+
+struct Cabinet {
+    float x = 0, y = 0;
+    bool active = true;
 };
 
 enum MessageId : uint8_t { MSG_NONE = 0, MSG_FIND_DOOR = 1, MSG_ALMOND_WATER = 2, MSG_PIPE_DREAMS = 3 };
@@ -64,6 +71,12 @@ struct Game {
     float stamina;
     bool exhausted;
     bool flashlight;
+    bool hiding;
+    int hiddenCabinet;
+    float jumpHeight;
+    float jumpVelocity;
+    Cabinet cabinets[4];
+    int cabinetCount;
     int level;
     bool dead;
     float deadTime;
