@@ -34,6 +34,13 @@ static void carveCorridor(Game& g, int ax, int ay, int bx, int by) {
     while (y != by) { carveRect(g, x, y, x + 1, y + 1); y += (by > y) ? 1 : -1; }
 }
 
+// Corredores estreitos de manutencao do Pipe Dreams (uma celula de largura).
+static void carvePipeCorridor(Game& g, int ax, int ay, int bx, int by) {
+    int x = ax, y = ay;
+    while (x != bx) { carveRect(g, x, y, x, y); x += (bx > x) ? 1 : -1; }
+    while (y != by) { carveRect(g, x, y, x, y); y += (by > y) ? 1 : -1; }
+}
+
 static void updateDir(Game& g) {
     g.dirX = cosf(g.angle);
     g.dirY = sinf(g.angle);
@@ -68,14 +75,26 @@ static void computeDistances(Game& g) {
 static void generate(Game& g) {
     memset(g.map, 1, sizeof(g.map));
     int prevCx = 0, prevCy = 0;
-    for (int i = 0; i < 22; i++) {
-        int w = rndRange(g, 3, 8), h = rndRange(g, 3, 8);
+    const bool pipeDreams = (g.level == 2);
+    const int roomCount = pipeDreams ? 27 : 22;
+    for (int i = 0; i < roomCount; i++) {
+        int w = pipeDreams ? rndRange(g, 3, 5) : rndRange(g, 3, 8);
+        int h = pipeDreams ? rndRange(g, 3, 5) : rndRange(g, 3, 8);
         int x = rndRange(g, 1, MAP_W - 2 - w), y = rndRange(g, 1, MAP_H - 2 - h);
         carveRect(g, x, y, x + w - 1, y + h - 1);
         int cx = x + w / 2, cy = y + h / 2;
         if (i == 0) {
             g.px = cx + 0.5f;
             g.py = cy + 0.5f;
+        } else if (pipeDreams) {
+            // Alterna a ordem dos cotovelos para criar um labirinto industrial.
+            if ((i & 1) == 0) {
+                carvePipeCorridor(g, prevCx, prevCy, cx, prevCy);
+                carvePipeCorridor(g, cx, prevCy, cx, cy);
+            } else {
+                carvePipeCorridor(g, prevCx, prevCy, prevCx, cy);
+                carvePipeCorridor(g, prevCx, cy, cx, cy);
+            }
         } else {
             carveCorridor(g, prevCx, prevCy, cx, cy);
         }
@@ -83,17 +102,19 @@ static void generate(Game& g) {
         prevCy = cy;
     }
 
-    // pilares (so onde os 8 vizinhos sao chao, para nunca bloquear caminho)
-    for (int y = 2; y < MAP_H - 2; y++)
-        for (int x = 2; x < MAP_W - 2; x++) {
-            if (g.map[y][x] != 0 || rnd(g) % 9 != 0) continue;
-            if (abs(x - (int)g.px) <= 1 && abs(y - (int)g.py) <= 1) continue;  // nunca perto do spawn
-            bool open = true;
-            for (int dy = -1; dy <= 1; dy++)
-                for (int dx = -1; dx <= 1; dx++)
-                    if (g.map[y + dy][x + dx] != 0) open = false;
-            if (open) g.map[y][x] = 1;
-        }
+    // Pilares somente no Nivel 1; no Pipe Dreams os corredores devem permanecer estreitos.
+    if (!pipeDreams) {
+        for (int y = 2; y < MAP_H - 2; y++)
+            for (int x = 2; x < MAP_W - 2; x++) {
+                if (g.map[y][x] != 0 || rnd(g) % 9 != 0) continue;
+                if (abs(x - (int)g.px) <= 1 && abs(y - (int)g.py) <= 1) continue;
+                bool open = true;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++)
+                        if (g.map[y + dy][x + dx] != 0) open = false;
+                if (open) g.map[y][x] = 1;
+            }
+    }
 
     // porta de saida: parede encostada em chao, longe do jogador
     g.exitX = -100;
@@ -117,7 +138,7 @@ static void generate(Game& g) {
     }
 
     // anomalias, longe do jogador
-    g.anCount = 1 + (g.level - 1) / 2;
+    g.anCount = (g.level == 2) ? 2 : 1 + (g.level - 1) / 2;
     if (g.anCount > MAX_ANOMALIES) g.anCount = MAX_ANOMALIES;
     for (int i = 0; i < g.anCount; i++) {
         int px = 0, py = 0;
@@ -159,8 +180,8 @@ static void startLevel(Game& g) {
     g.nearest = 99.0f;
     g.calmTimer = 0;
     g.flicker = 1.0f;
-    g.msgId = (g.level == 1) ? MSG_FIND_DOOR : MSG_NONE;
-    g.msgTimer = (g.level == 1) ? 5.0f : 0.0f;
+    g.msgId = (g.level == 1) ? MSG_FIND_DOOR : ((g.level == 2) ? MSG_PIPE_DREAMS : MSG_NONE);
+    g.msgTimer = (g.level <= 2) ? 5.0f : 0.0f;
     updateDir(g);
     computeDistances(g);
 }
