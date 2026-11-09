@@ -121,8 +121,6 @@
       writeText("world.mtl",makeMtl(game.level));
       writeText("world.obj",buildObj(game));
       if(batch)batch.clear();
-      if(obj&&obj.free)obj.free();
-      if(data&&data.free)data.free();
       data=new RenderData("world.obj");
       data.pipeline=Render.PL_DEFAULT;
       data.face_culling=Render.CULL_FACE_NONE;
@@ -135,7 +133,6 @@
     }
     function render(game) {
       if(!ready||!batch)return;
-      const canvas=Screen.getMode();
       Screen.setParam(Screen.DEPTH_TEST_ENABLE,true);
       const eyeY=1.55+game.jumpHeight;
       Camera.position(game.px,eyeY,game.py);
