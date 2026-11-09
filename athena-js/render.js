@@ -57,11 +57,35 @@
         if(c.type===2) {r=255;gr=255;bl=255;b=Math.max(1,b);}
         else if(g.level===2){r=87;gr=78;bl=63;}
         else {r=205;gr=186;bl=84;}
-        if(c.type!==2) {
-          const stripe=(c.u*4)%1;
-          if(stripe<.14){r*=.80;gr*=.80;bl*=.80;}
+        const wallW=c.x2-c.x,wallH=c.bottom-c.top;
+        if(c.type!==2&&g.level===1) {
+          const texX=(c.u*128)|0,sx=texX%32;
+          const stain=0.90+(((texX*17+((c.depth*13)|0)*29)&15)/150);
+          b*=stain;
+          if(sx<4)b*=0.86;
+          else if(sx===4)b*=1.05;
         }
-        rect(c.x,c.top,c.x2-c.x,c.bottom-c.top,color(r*b,gr*b,bl*b));
+        rect(c.x,c.top,wallW,wallH,color(r*b,gr*b,bl*b));
+        if(c.type===1&&g.level===1) {
+          // Relevo repetido do papel de parede: costuras e losangos discretos.
+          const texX=(c.u*128)|0,sx=texX%32;
+          if(sx<4)rect(c.x,c.top,wallW,wallH,color(r*b*.86,gr*b*.86,bl*b*.86));
+          const center=(c.top+c.bottom)*.5;
+          const diamond=(texX%32)-16;
+          const markY=center+diamond*1.8;
+          if(Math.abs(diamond)<7&&markY>c.top&&markY<c.bottom)
+            rect(c.x,markY,wallW,Math.max(1,wallH*.018),color(r*b*.88,gr*b*.88,bl*b*.88));
+          if(c.bottom-c.top>30) {
+            rect(c.x,c.top,wallW,Math.max(1,wallH*.012),color(r*b*.78,gr*b*.78,bl*b*.78));
+            rect(c.x,c.bottom-Math.max(1,wallH*.012),wallW,Math.max(1,wallH*.012),color(r*b*.82,gr*b*.82,bl*b*.82));
+          }
+        } else if(c.type===1&&g.level===2) {
+          // Cano vermelho, flange metalica e suporte repetidos no corredor Pipe Dreams.
+          const pipeY=(c.top+wallH*.19);
+          rect(c.x,pipeY,wallW,Math.max(2,wallH*.10),color(105*b,20*b,13*b));
+          rect(c.x,pipeY+Math.max(2,wallH*.025),wallW,Math.max(1,wallH*.018),color(190*b,48*b,30*b));
+          rect(c.x,pipeY+Math.max(2,wallH*.095),wallW,Math.max(2,wallH*.035),color(105*b,103*b,91*b));
+        }
       }
     }
     function projectCenter(g,x,y) {
