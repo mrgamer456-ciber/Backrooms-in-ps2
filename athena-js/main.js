@@ -16,18 +16,25 @@ import "world3d.js";
       throw new Error("Carregue game.js, input.js, raycast.js, render.js, audio.js, assets.js, font.js e world3d.js antes de main.js.");
     const game=root.BackroomsGame.makeGame();
     const renderer=root.BackroomsRenderer.createRenderer();
+    renderer.init(null,null);
+    renderer.drawLoading(5,"INICIANDO MOTOR");
+    renderer.drawLoading(15,"CRIANDO TEXTURAS");
     if(!root.BackroomsAssets.create())
       throw new Error("Falha ao gerar as texturas BMP do Backrooms. Verifique o espaco livre e a pasta de scripts.");
+    renderer.drawLoading(58,"CARREGANDO TEXTURAS");
     const textures=root.BackroomsAssets.load();
     if(!textures)
       throw new Error("AthenaEnv nao conseguiu carregar as texturas BMP do Backrooms.");
+    renderer.setTextures(textures);
+    renderer.drawLoading(72,"PREPARANDO AUDIO");
     // Diagnostico temporario: desativa o renderer VU1 nativo.
     // O teste basico de AthenaEnv funciona, mas o VU1 ainda gera EE Exception
     // dentro de draw_vui_with_colors. Mantemos o raycaster 2.5D para testar
     // movimento, colisao, HUD e gameplay sem chamar o caminho 3D nativo.
     const world3d=null;
-    renderer.init(textures,null);
     const audio=root.BackroomsAudio.create();
+    renderer.drawLoading(96,"FINALIZANDO");
+    renderer.drawLoading(100,"PRONTO");
     let pad=null;
     if(typeof Pads!=="undefined")pad=Pads.get(0);
     let lastTime=Date.now();
