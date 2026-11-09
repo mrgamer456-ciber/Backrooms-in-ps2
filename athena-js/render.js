@@ -288,7 +288,7 @@
       if(!p)return;
       const col=Math.max(0,Math.min(scene.columns.length-1,(p.x/(w/scene.columns.length))|0));
       if(p.depth>=scene.columns[col].depth+0.6)return;
-      const hh=Math.min(h*1.2,p.size*.78),ww=hh*.48;
+      const hh=p.size*.78,ww=hh*.48;
       const x=p.x-ww*.5,y=p.horizon-hh*.5;
       rect(x-ww*.05,y-hh*.02,ww*1.10,hh*1.04,color(22,25,27));
       rect(x,y,ww,hh,color(82,91,94));
