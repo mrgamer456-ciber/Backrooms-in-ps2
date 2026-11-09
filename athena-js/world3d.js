@@ -141,6 +141,7 @@
     }
     function render(game) {
       if(!ready||!batch)return;
+      Render.begin();
       Screen.setParam(Screen.DEPTH_TEST_ENABLE,true);
       const eyeY=1.55+game.jumpHeight;
       Camera.position(game.px,eyeY,game.py);
@@ -150,7 +151,6 @@
       Lights.set(light,Lights.DIRECTION,-game.dirX,-.35,-game.dirY);
       const diffuse=game.flashlight ? 0.92 : 0.28;
       Lights.set(light,Lights.DIFFUSE,diffuse,diffuse*.94,diffuse*.82);
-      Render.begin();
       rootNode.update();
       batch.render();
       Screen.setParam(Screen.DEPTH_TEST_ENABLE,false);
