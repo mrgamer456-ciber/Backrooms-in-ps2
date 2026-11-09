@@ -177,6 +177,7 @@ void newGame(Game& g, uint32_t seed) {
     g.stamina = 1.0f;
     g.exhausted = false;
     g.angle = 0;
+    g.pitch = 0;
     startLevel(g);
 }
 
@@ -215,6 +216,9 @@ void update(Game& g, const Input& in, float dt) {
     }
     g.survived += dt;
     g.angle += in.turn * TURN_SPEED * dt;
+    g.pitch += in.lookY * 1.35f * dt;
+    if (g.pitch > 0.38f) g.pitch = 0.38f;
+    if (g.pitch < -0.38f) g.pitch = -0.38f;
     updateDir(g);
 
     // stamina
@@ -369,10 +373,11 @@ void castRays(Game& g, int screenH) {
         if (perp < 0.05f) perp = 0.05f;
 
         float fullH = (float)screenH / perp;
-        float fullTop = (float)screenH * 0.5f - fullH * 0.5f;
+        float horizon = (float)screenH * (0.5f + g.pitch);
+        float fullTop = horizon - fullH * 0.5f;
         int lineH = (int)fullH;
-        int top = screenH / 2 - lineH / 2;
-        int bottom = screenH / 2 + lineH / 2;
+        int top = (int)(horizon - lineH * 0.5f);
+        int bottom = (int)(horizon + lineH * 0.5f);
         if (top < 0) top = 0;
         if (bottom > screenH) bottom = screenH;
 
