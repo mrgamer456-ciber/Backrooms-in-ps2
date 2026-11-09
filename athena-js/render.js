@@ -28,7 +28,7 @@
     function drawBackground(g,scene) {
       let horizon=h*(.5+g.pitch)+g.jumpHeight*h*.55;
       horizon=Math.max(h*.12,Math.min(h*.90,horizon));
-      const bands=16;
+      const bands=8;
       for(let i=0;i<bands;i++) {
         const t=(i+0.5)/bands;
         const y0=horizon*i/bands,y1=horizon*(i+1)/bands;
@@ -346,7 +346,7 @@
           const scene=root.BackroomsRaycast.cast(game,w,h,80);
           drawSprites(game,scene);
         } else {
-          const scene=root.BackroomsRaycast.cast(game,w,h,160);
+          const scene=root.BackroomsRaycast.cast(game,w,h,64);
           drawBackground(game,scene);drawWalls(game,scene);
           drawDoor(game,scene);drawCabinet(game,scene);drawSprites(game,scene);
         }
