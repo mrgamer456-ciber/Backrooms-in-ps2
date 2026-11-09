@@ -12,7 +12,7 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 - `game.js`: logica do jogo — mapa, movimento, colisao, pulo, stamina, lanterna, armario, itens e IA das anomalias.
 - `input.js`: leitura do DualShock pelo modulo `Pads`, incluindo analogicos, direcional e botoes.
 - `raycast.js`: raycaster por coluna, profundidade, iluminacao da lanterna e projecao de sprites.
-- `render.js`: renderizacao 2.5D com `Draw`, `Font` e `Color`, porta branca, armario, sprites, HUD VHS e a geometria aprovada da mao/lanterna.
+- `render.js`: camada 2D de sprites, HUD VHS, fonte bitmap e geometria aprovada da mao/lanterna sobre o mundo 3D.
 
 ## Como testar no AthenaEnv
 
@@ -39,6 +39,6 @@ Nao e necessario compilar um ELF do jogo: o AthenaEnv executa os scripts JavaScr
 
 **Ainda nao e a versao final nem foi validada no PS2.** A logica principal, leitura do DualShock e loop do AthenaEnv foram ligados. O mundo agora e uma malha 3D real gerada do mapa e enviada ao renderer VU1: paredes texturizadas, piso, teto, porta, armario e luminarias. O raycaster continua apenas para colisao/projecao e o HUD VHS/itens/anomalias/mao ficam como camada 2D por cima. O papel de parede e os canos agora sao gerados como BMPs 128x128 com o padrao portado do gerador C++ original. O audio procedural ja foi ligado usando WAVs gerados pelo proprio script no primeiro inicio; precisa de teste no console. O modelo 3D de Steve ainda precisa ser integrado.
 
-O raycaster foi mantido porque e a tecnologia do jogo C++ atual; o renderer 3D de modelos do AthenaEnv pode ser integrado para personagens/objetos sem transformar o mapa inteiro em um jogo de malha 3D.
+O mapa continua usando a logica de colisao original, mas a exibicao do cenario foi migrada para malha 3D. O modelo rigged do Steve e a animacao pronta de pulo ainda dependem dos arquivos de modelo/animacao escolhidos; a pasta `models/README.md` registra a fonte e os formatos necessarios.
 
 O codigo original em `source/backrooms-ps2/` nao foi alterado por esta conversao.
