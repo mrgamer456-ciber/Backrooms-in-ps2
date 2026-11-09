@@ -2,16 +2,18 @@ import "game.js";
 import "input.js";
 import "raycast.js";
 import "render.js";
+import "audio.js";
 
 // Ponto de entrada AthenaEnv. Athena executa main.js automaticamente.
 (function(root) {
   "use strict";
   function startBackroomsAthena() {
-    if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer||!root.BackroomsRaycast)
+    if(!root.BackroomsGame||!root.BackroomsInput||!root.BackroomsRenderer||!root.BackroomsRaycast||!root.BackroomsAudio)
       throw new Error("Carregue game.js, input.js, raycast.js e render.js antes de main.js.");
     const game=root.BackroomsGame.makeGame();
     const renderer=root.BackroomsRenderer.createRenderer();
     renderer.init();
+    const audio=root.BackroomsAudio.create();
     let pad=null;
     if(typeof Pads!=="undefined")pad=Pads.get(0);
     let lastTime=Date.now();
@@ -29,6 +31,7 @@ import "render.js";
       } else {
         root.BackroomsGame.update(game,input,dt);
       }
+      root.BackroomsAudio.update(audio,game,dt);
       renderer.draw(game);
     };
     // AthenaEnv usa os.setInterval no loop principal; nao bloqueia o runtime.
