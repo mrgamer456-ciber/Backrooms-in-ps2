@@ -110,8 +110,9 @@ assert.equal(renderBegins, 1, "renderer deve iniciar um passe 3D por quadro");
 
 
 const pipeMap = new Uint8Array(40 * 40);
+pipeMap.fill(1);
 for (let x = 1; x <= 38; x++) pipeMap[20 * 40 + x] = 0;
-for (let y = 18; y <= 20; y++) pipeMap[y * 40 + 7] = 0;
+for (let y = 18; y <= 20; y++) for (let x = 7; x <= 8; x++) pipeMap[y * 40 + x] = 0;
 pipeMap[19 * 40 + 8] = 3;
 pipeMap[20 * 40 + 38] = 2;
 const pipeGame = {
