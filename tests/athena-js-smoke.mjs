@@ -64,9 +64,18 @@ delete globalThis.Pads;
 // Exercita a criação da malha 3D com mocks das APIs AthenaEnv.
 const generatedFiles = new Map();
 globalThis.std = {
-  open(path) {
+  exists(path) { return generatedFiles.has(path); },
+  err: { puts() {} },
+  open(path, mode) {
+    let textValue = "";
+    let binaryValue = null;
     return {
-      puts(value) { generatedFiles.set(path, value); },
+      puts(value) { textValue += value; generatedFiles.set(path, textValue); },
+      write(buffer, offset, length) {
+        binaryValue = buffer.slice(offset, offset + length);
+        generatedFiles.set(path, binaryValue);
+        return length;
+      },
       close() {}
     };
   }
@@ -138,5 +147,42 @@ assert.equal(world.revision, 2, "troca para Pipe Dreams deve reconstruir a malha
 assert.ok(generatedFiles.get("world.obj").includes("usemtl pipewall"), "Pipe Dreams deve usar paredes industriais");
 assert.ok(generatedFiles.get("world.obj").includes("usemtl lockerpanel"), "armario deve ter painel frontal");
 assert.ok(generatedFiles.get("world.mtl").includes("newmtl redlamp"), "Pipe Dreams deve incluir material de luz vermelha");
+
+
+// Verifica os arquivos binarios que o jogo cria no proprio PS2.
+load("athena-js/assets.js");
+const assetsOk = BackroomsAssets.create();
+assert.equal(assetsOk, true, "gerador de texturas deve criar os BMPs");
+const wallBmp = new DataView(generatedFiles.get("bk_wallpaper.bmp"));
+assert.equal(wallBmp.getUint8(0), 0x42, "BMP deve comecar com B");
+assert.equal(wallBmp.getUint8(1), 0x4d, "BMP deve comecar com M");
+assert.equal(wallBmp.getUint32(2, true), 54 + 128 * 128 * 3, "BMP deve ter tamanho correto");
+assert.equal(wallBmp.getInt32(18, true), 128, "BMP deve ter largura 128");
+assert.equal(wallBmp.getInt32(22, true), 128, "BMP deve ter altura 128");
+assert.equal(wallBmp.getUint16(28, true), 24, "BMP deve usar 24 bits");
+assert.equal(generatedFiles.get("bk_pipedreams.bmp").byteLength, 54 + 128 * 128 * 3,
+  "textura Pipe Dreams deve ter o tamanho correto");
+
+// O sistema de som precisa gerar WAV PCM valido e criar os streams sem quebrar o jogo.
+load("athena-js/audio.js");
+globalThis.Sound = {
+  setVolume() {},
+  Stream(path) {
+    assert.ok(generatedFiles.has(path), "WAV deve existir antes de abrir o stream: " + path);
+    return { loop: false, playing() { return false; }, play() {}, pause() {}, rewind() {} };
+  }
+};
+const audioState = BackroomsAudio.create();
+assert.equal(audioState.ready, true, "audio deve inicializar com os streams");
+for (const wavPath of ["bk_ambience.wav", "bk_step.wav", "bk_pickup.wav", "bk_chime.wav", "bk_heart.wav", "bk_scare.wav"]) {
+  const wav = new DataView(generatedFiles.get(wavPath));
+  assert.equal(String.fromCharCode(wav.getUint8(0), wav.getUint8(1), wav.getUint8(2), wav.getUint8(3)),
+    "RIFF", wavPath + " deve ter cabecalho RIFF");
+  assert.equal(String.fromCharCode(wav.getUint8(8), wav.getUint8(9), wav.getUint8(10), wav.getUint8(11)),
+    "WAVE", wavPath + " deve ter formato WAVE");
+  assert.equal(wav.getUint16(22, true), 1, wavPath + " deve ser mono");
+  assert.equal(wav.getUint16(34, true), 16, wavPath + " deve usar PCM 16 bits");
+}
+delete globalThis.Sound;
 
 console.log("Athena JS smoke tests: OK");
