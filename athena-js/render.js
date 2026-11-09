@@ -324,7 +324,7 @@
       centeredPlain(h*.50,"NIVEL 0",color(90,75,15),3);
       if((frame/30|0)%2===0)centered(h*.68,"APERTE START OU R2",color(240,240,240),3);
       centered(h*.80,"ANALOGICO DIREITO: OLHAR E VIRAR",color(200,200,190),2);
-      centered(h*.86,"R1: CORRER  L1: LANTERNA",color(200,200,190),2);
+      centered(h*.86,"R1: CORRER   L1: LANTERNA",color(200,200,190),2);
     }
     function drawDead(g) {
       rect(0,0,w,h,color(0,0,0));
@@ -332,7 +332,7 @@
       const runner=g.killer===2,stalker=g.killer===1;
       const faceCol=runner?color(170,25,25):color(225,225,212);
       const eyeCol=runner?color(255,255,255):color(0,0,0);
-      const ew=stalker?.16:.10;
+      const ew=stalker ? 0.16 : 0.10;
       rect(cx-fw*.5,top,fw,fh,faceCol);
       rect(cx-fw*(.20+ew),top+fh*.26,fw*.10,fh*.20,eyeCol);
       rect(cx+fw*.10,top+fh*.26,fw*(.10+ew),fh*.20,eyeCol);
@@ -346,7 +346,7 @@
     return {
       init(textures) {
         if(typeof Screen==="undefined"||typeof Draw==="undefined"||typeof Color==="undefined"||!root.BackroomsFont)
-          throw new Error("AthenaEnv precisa dos modulos Screen, Draw, Font e Color.");
+          throw new Error("AthenaEnv precisa dos modulos Screen, Draw, Color e fonte bitmap.");
         Screen.setParam(Screen.DEPTH_TEST_ENABLE,false);
         Screen.setVSync(true);
         const mode=Screen.getMode();w=mode.width;h=mode.height;
