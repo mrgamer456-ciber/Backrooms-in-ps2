@@ -146,6 +146,7 @@ static bk::Input readInput()
         in.moveX = axis(pad.ljoy_h);
         in.moveY = -axis(pad.ljoy_v);
         in.turn = axis(pad.rjoy_h);
+        in.lookY = -axis(pad.rjoy_v);
         if (b & PAD_UP)    in.moveY += 1.0f;
         if (b & PAD_DOWN)  in.moveY -= 1.0f;
         if (b & PAD_LEFT)  in.turn -= 1.0f;
@@ -237,7 +238,7 @@ static void drawTitle(GSGLOBAL *gs, uint32_t frame)
     drawText(gs, (W - textWidth("NIVEL 0", 3.0f)) / 2.0f, H * 0.50f, 3.0f, rgb(90, 75, 15), "NIVEL 0");
     if (((frame / 30u) & 1u) == 0)
         drawTextCentered(gs, H * 0.68f, 3.0f, rgb(240, 240, 240), "APERTE START");
-    drawTextCentered(gs, H * 0.80f, 2.0f, rgb(200, 200, 190), "ANALOGICOS: ANDAR E OLHAR");
+    drawTextCentered(gs, H * 0.80f, 2.0f, rgb(200, 200, 190), "ANALOGICO DIREITO: OLHAR E VIRAR");
     drawTextCentered(gs, H * 0.86f, 2.0f, rgb(200, 200, 190), "R1 OU X: CORRER");
 }
 
@@ -271,16 +272,36 @@ static void drawWorld(GSGLOBAL *gs)
     const float colW = W / (float)bk::RAY_COLS;
     const float flick = g.flicker;
 
-    // teto e chao em faixas (escurecem perto do horizonte = neblina)
+    // Teto do Level 1: superficie amarelo-creme lisa, diferente do papel de parede.
+    // O horizonte acompanha a inclinacao vertical do analógico direito.
+    const float horizon = H * (0.5f + g.pitch);
     const int bands = 12;
     for (int i = 0; i < bands; i++) {
-        float t = ((float)i + 0.5f) / (float)bands;       // 0 = longe do horizonte, 1 = horizonte
-        float k = (0.65f * (1.0f - t) + 0.12f) * flick;
-        float y0 = (H / 2) * (float)i / bands, y1 = (H / 2) * (float)(i + 1) / bands;
-        rect(gs, 0, y0, W, y1, rgb(190 * k, 180 * k, 120 * k));            // teto
+        float t = ((float)i + 0.5f) / (float)bands;
+        float k = (0.72f * (1.0f - t) + 0.16f) * flick;
+        float y0 = horizon * (float)i / bands, y1 = horizon * (float)(i + 1) / bands;
+        // Teto liso amarelado, com variacao suave de luz; nao reutiliza a textura das paredes.
+        rect(gs, 0, y0, W, y1, rgb(218 * k, 211 * k, 166 * k));
         float k2 = (0.50f * (1.0f - t) + 0.08f) * flick;
         float f0 = H - y1, f1 = H - y0;
-        rect(gs, 0, f0, W, f1, rgb(120 * k2, 95 * k2, 50 * k2));           // carpete
+        rect(gs, 0, f0, W, f1, rgb(120 * k2, 95 * k2, 50 * k2));
+    }
+
+    // Luminarias fluorescentes retangulares no teto, em perspectiva.
+    // As mais distantes ficam pequenas perto do horizonte; as proximas crescem em direcao ao topo.
+    for (int i = 0; i < 5; i++) {
+        float t = (float)i / 4.0f;
+        float cy = horizon - (horizon - 8.0f) * (1.0f - t) * 0.92f;
+        float halfW = W * (0.025f + 0.105f * t);
+        float halfH = H * (0.004f + 0.018f * t);
+        float cx = W * 0.5f;
+        float glow = (0.72f + 0.28f * flick) * (1.0f - 0.10f * t);
+        // halo difuso e moldura metalica escura
+        rect(gs, cx - halfW * 1.30f, cy - halfH * 1.75f, cx + halfW * 1.30f, cy + halfH * 1.75f, rgb(232 * glow, 222 * glow, 166 * glow));
+        rect(gs, cx - halfW, cy - halfH, cx + halfW, cy + halfH, rgb(65, 61, 43));
+        rect(gs, cx - halfW * 0.88f, cy - halfH * 0.70f, cx + halfW * 0.88f, cy + halfH * 0.70f, rgb(255 * glow, 255 * glow, 238 * glow));
+        // pequenas bordas para dar profundidade ao difusor
+        rect(gs, cx - halfW * 0.88f, cy - halfH * 0.70f, cx + halfW * 0.88f, cy - halfH * 0.48f, rgb(255, 255, 250));
     }
 
     // paredes
@@ -348,7 +369,7 @@ static void drawWorld(GSGLOBAL *gs)
             float depth=invDet*(-g.planeY*rx+g.planeX*ry);
             if (depth <= 0.18f) return false;
             sx=W*0.5f*(1.0f+cameraX/depth);
-            sy=H*0.5f+(0.5f-v.z)*H/depth;
+            sy=H*(0.5f+g.pitch)+(0.5f-v.z)*H/depth;
             return true;
         };
         auto face = [&](const DoorVertex &a, const DoorVertex &b,
@@ -439,7 +460,7 @@ static void drawWorld(GSGLOBAL *gs)
         int cm = (int)((float)s.centerX / colW);
         if (cm < 0 || cm >= bk::RAY_COLS || s.depth >= g.cols[cm].depth) continue;
         float lh = (float)s.lineHeight, cx = (float)s.centerX;
-        float floorY = H / 2 + lh / 2;
+        float floorY = horizon + lh / 2;
         float ch = lh * 0.14f, cw = lh * 0.055f;
         float vis = 1.0f - s.depth / bk::MAX_VIEW;
         if (vis < 0.3f) vis = 0.3f;
@@ -466,7 +487,7 @@ static void drawWorld(GSGLOBAL *gs)
         if (!s.visible) continue;
         float lh = (float)s.lineHeight;
         float sprH = lh * 0.92f;
-        float floorY = H / 2 + lh / 2;
+        float floorY = horizon + lh / 2;
         float topY = floorY - sprH;
         float headH = sprH * 0.20f;
         float halfW = lh * 0.15f;
