@@ -72,6 +72,7 @@ struct Game {
     bool exhausted;
     bool flashlight;
     bool hiding;
+    float enemyHiddenTimer;
     int hiddenCabinet;
     float jumpHeight;
     float jumpVelocity;
