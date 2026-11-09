@@ -84,6 +84,8 @@
     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(tile(g,x,y)===3) {
       const x0=x+.12,x1=x+.88,z0=y+.12,z1=y+.88,top=1.78;
       quad("locker",[vec(x0,0,z0),vec(x0,0,z1),vec(x0,top,z1),vec(x0,top,z0)],uvFlat,[-1,0,0]);
+      // A porta do armario fica voltada para oeste, de frente para o corredor do Pipe Dreams.
+      quad("lockerpanel",[vec(x0-.003,.12,z0+.08),vec(x0-.003,.12,z1-.08),vec(x0-.003,1.62,z1-.08),vec(x0-.003,1.62,z0+.08)],uvFlat,[-1,0,0]);
       quad("locker",[vec(x1,0,z1),vec(x1,0,z0),vec(x1,top,z0),vec(x1,top,z1)],uvFlat,[1,0,0]);
       quad("locker",[vec(x0,0,z0),vec(x1,0,z0),vec(x1,top,z0),vec(x0,top,z0)],uvFlat,[0,0,-1]);
       quad("locker",[vec(x0,0,z1),vec(x1,0,z1),vec(x1,top,z1),vec(x0,top,z1)],uvFlat,[0,0,1]);
