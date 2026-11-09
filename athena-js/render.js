@@ -94,26 +94,7 @@
           else if(sx===4)b*=1.05;
         }
         rect(c.x,c.top,wallW,wallH,color(r*b,gr*b,bl*b));
-        if(c.type===1&&g.level===1) {
-          // Relevo repetido do papel de parede: costuras e losangos discretos.
-          const texX=(c.u*128)|0,sx=texX%32;
-          if(sx<4)rect(c.x,c.top,wallW,wallH,color(r*b*.86,gr*b*.86,bl*b*.86));
-          const center=(c.top+c.bottom)*.5;
-          const diamond=(texX%32)-16;
-          const markY=center+diamond*1.8;
-          if(Math.abs(diamond)<7&&markY>c.top&&markY<c.bottom)
-            rect(c.x,markY,wallW,Math.max(1,wallH*.018),color(r*b*.88,gr*b*.88,bl*b*.88));
-          if(c.bottom-c.top>30) {
-            rect(c.x,c.top,wallW,Math.max(1,wallH*.012),color(r*b*.78,gr*b*.78,bl*b*.78));
-            rect(c.x,c.bottom-Math.max(1,wallH*.012),wallW,Math.max(1,wallH*.012),color(r*b*.82,gr*b*.82,bl*b*.82));
-          }
-        } else if(c.type===1&&g.level===2) {
-          // Cano vermelho, flange metalica e suporte repetidos no corredor Pipe Dreams.
-          const pipeY=(c.top+wallH*.19);
-          rect(c.x,pipeY,wallW,Math.max(2,wallH*.10),color(105*b,20*b,13*b));
-          rect(c.x,pipeY+Math.max(2,wallH*.025),wallW,Math.max(1,wallH*.018),color(190*b,48*b,30*b));
-          rect(c.x,pipeY+Math.max(2,wallH*.095),wallW,Math.max(2,wallH*.035),color(105*b,103*b,91*b));
-        }
+
       }
     }
     function projectCenter(g,x,y) {
@@ -218,13 +199,13 @@
       let sec=(g.survived|0)+1;if(sec<1)sec=1;
       const clock=("0"+((sec/3600)|0)).slice(-2)+":"+("0"+(((sec/60)|0)%60)).slice(-2)+":"+("0"+(sec%60)).slice(-2);
       text(35,h-69,clock,white,3);
-      for(let i=0;i<9;i++) {
+      if((frame&3)===0)for(let i=0;i<3;i++) {
         const n=(frame*37+i*7919)>>>0;
         const y=54+hashf(n)*(h-108),x=hashf(n+17)*(w-45);
         const len=5+hashf(n+31)*38;
         if((n&3)!==0)rect(x,y,len,1,(i&1)?dim:white);
       }
-      if((frame%47)<3) {
+      if((frame%94)<2) {
         const y=h-20-hashf(frame)*24;
         rect(18,y,w*(.18+.55*hashf(frame+9)),1,dim);
       }
@@ -362,7 +343,7 @@
         if(game.dead){drawDead(game);Screen.flip();return;}
         if(world3d&&world3d.ready) {
           world3d.render(game);
-          const scene=root.BackroomsRaycast.cast(game,w,h,160);
+          const scene=root.BackroomsRaycast.cast(game,w,h,80);
           drawSprites(game,scene);
         } else {
           const scene=root.BackroomsRaycast.cast(game,w,h,160);
