@@ -82,7 +82,9 @@
   }
   function update(state,game,dt) {
     if(!state||!state.ready||game.onTitle)return;
-    if(!state.ambient.playing())state.ambient.play();
+    if(game.dead) {
+      if(state.ambient.playing())state.ambient.pause();
+    } else if(!state.ambient.playing())state.ambient.play();
     if(game.level!==state.lastLevel){play(state.chime);state.lastLevel=game.level;}
     if(game.pickups>state.lastPickups){play(state.pickup);state.lastPickups=game.pickups;}
     const walk=(game.walkDist/.9)|0;
