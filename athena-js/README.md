@@ -1,23 +1,40 @@
-# Backrooms PS2 — port para AthenaEnv
+# Backrooms PS2 — port JavaScript para AthenaEnv
 
-Esta pasta inicia a conversao do projeto C++/PS2SDK para JavaScript/AthenaEnv. O codigo original continua intacto em `source/backrooms-ps2/`.
+Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O projeto original C++/PS2SDK continua intacto em `source/backrooms-ps2/`.
 
 ## Arquivos
-- `game.js`: logica independente de plataforma (mapa, jogador, pulo, lanterna, armario, itens e anomalia).
-- `input.js`: adaptador de controles; a leitura fisica do controle sera ligada aos nomes exatos da API AthenaEnv na etapa de integracao.
-- `render.js`: camada de renderizacao; sera integrada ao pipeline Render/SceneNode/Batch do AthenaEnv.
-- `main.js`: ponto de entrada e loop principal.
 
-## Estado
-**Portabilidade em andamento — nao e um ELF pronto ainda.** A logica esta sendo separada da renderizacao para evitar misturar chamadas antigas do gsKit com a API AthenaEnv. A conversao visual completa (raycaster, texturas, porta, armario, anomalia, mao/lanterna e HUD VHS) e o audio serao integrados nas proximas etapas.
+- `main.js`: entrada automatica, imports e loop com `os.setInterval`.
+- `game.js`: logica do jogo — mapa, movimento, colisao, pulo, stamina, lanterna, armario, itens e IA das anomalias.
+- `input.js`: leitura do DualShock pelo modulo `Pads`, incluindo analogicos, direcional e botoes.
+- `raycast.js`: raycaster por coluna, profundidade, iluminacao da lanterna e projecao de sprites.
+- `render.js`: renderizacao 2.5D com `Draw`, `Font` e `Color`, HUD VHS, tela inicial, morte e modelo 2D da mao/lanterna.
 
-## Controles planejados
-- Analógico esquerdo: andar
-- Analógico direito: olhar/virar
-- R1: correr
-- X: pular
-- L1: ligar/desligar lanterna
-- Quadrado: entrar/sair do armario
-- START ou R2: iniciar/reiniciar
+## Como testar no AthenaEnv
 
-A lanterna em primeira pessoa e os elementos ja aprovados do jogo devem ser preservados durante a conversao.
+1. Copie os cinco arquivos JavaScript desta pasta para a pasta de scripts do AthenaEnv, mantendo todos juntos.
+2. Configure o AthenaEnv para iniciar `main.js` (esse e o nome padrao do runtime).
+3. Inicie o AthenaEnv no PS2. O jogo abre na tela inicial.
+4. Aperte START ou R2 para iniciar.
+
+Nao e necessario compilar um ELF do jogo: o AthenaEnv executa os scripts JavaScript. O ELF do proprio AthenaEnv continua sendo necessario para rodar o runtime.
+
+## Controles
+
+- Analógico esquerdo: andar.
+- Analógico direito horizontal: virar.
+- Analógico direito vertical: olhar para cima/baixo.
+- Direcional: andar/virar.
+- R1: correr.
+- X: pular.
+- L1: ligar/desligar a lanterna.
+- Quadrado: entrar/sair do armario no nivel 2.
+- START ou R2: iniciar/reiniciar.
+
+## Estado real desta conversao
+
+**Ainda nao e a versao final nem foi validada no PS2.** A logica principal foi portada e a primeira renderizacao 2.5D ja usa as APIs documentadas do AthenaEnv. A cena atual usa paredes procedurais coloridas; a textura original do papel de parede, o modelo 3D de Steve, o audio e alguns detalhes visuais ainda precisam ser convertidos e testados. A mao/lanterna foi recriada como desenho 2D aproximado e ainda precisa de comparacao visual com a versao C++ aprovada.
+
+O raycaster foi mantido porque e a tecnologia do jogo C++ atual; o renderer 3D de modelos do AthenaEnv pode ser integrado para personagens/objetos sem transformar o mapa inteiro em um jogo de malha 3D.
+
+O codigo original em `source/backrooms-ps2/` nao foi alterado por esta conversao.
