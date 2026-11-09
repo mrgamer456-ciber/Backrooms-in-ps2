@@ -245,7 +245,7 @@
         const cameraX=invDet*(g.dirY*rx-g.dirX*ry);
         const depth=invDet*(-g.planeY*rx+g.planeX*ry);
         if(depth<=.18)return null;
-        return {x:w*.5*(1+cameraX/depth),y=h*(.5+g.pitch)+(.5-v.z)*h/depth,depth};
+        return {x:w*.5*(1+cameraX/depth),y:h*(.5+g.pitch)+(.5-v.z)*h/depth,depth:depth};
       };
       const face=(a,b,c0,d,col)=>{
         const p1=project(a),p2=project(b),p3=project(c0),p4=project(d);
