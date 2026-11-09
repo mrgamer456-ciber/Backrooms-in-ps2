@@ -35,7 +35,7 @@ assert.equal(input.toggleFlashlight, true, "L1 deve gerar novo evento depois de 
 
 
 const fakePad = {
-  lx: 4096, ly: -4096, rx: 2048, ry: -2048,
+  lx: 128, ly: -128, rx: 64, ry: -64,
   update() {},
   pressed() { return false; }
 };
@@ -73,8 +73,7 @@ globalThis.Render = {
 };
 globalThis.Lights = {
   AMBIENT: 0, DIRECTION: 1, DIFFUSE: 2,
-  new() { return 3; },
-  set(id) { assert.equal(id, 3, "a luz deve usar o identificador criado"); }
+  set(id) { assert.equal(id, 0, "o renderizador deve usar um dos quatro slots de luz"); }
 };
 globalThis.Batch = class {
   add() {}
