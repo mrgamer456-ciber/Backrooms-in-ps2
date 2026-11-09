@@ -12,7 +12,7 @@ Esta pasta contem a versao em andamento do jogo para o runtime AthenaEnv. O proj
 
 ## Como testar no AthenaEnv
 
-1. Copie os cinco arquivos JavaScript desta pasta para a pasta de scripts do AthenaEnv, mantendo todos juntos.
+1. Copie os seis arquivos JavaScript desta pasta para a pasta de scripts do AthenaEnv, mantendo todos juntos.
 2. Configure o AthenaEnv para iniciar `main.js` (esse e o nome padrao do runtime).
 3. Inicie o AthenaEnv no PS2. O jogo abre na tela inicial.
 4. Aperte START ou R2 para iniciar.
